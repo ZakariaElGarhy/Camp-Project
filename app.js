@@ -248,6 +248,33 @@ document.getElementById('pay-download-btn').addEventListener('click', async () =
 document.addEventListener('DOMContentLoaded', async () => {
     checkUserSession();
     initEventListeners();
+const navbarNav = document.querySelector('.navbar nav');
+
+if (navbarNav) {
+  const themeToggleBtn = document.createElement('button');
+  themeToggleBtn.className = 'theme-toggle-btn';
+  themeToggleBtn.textContent = 'Mode / 🌙';
+  
+  navbarNav.appendChild(themeToggleBtn);
+
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'light');
+      themeToggleBtn.textContent = 'Mode / 🌙';
+      localStorage.setItem('theme', 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggleBtn.textContent = 'Mode / ☀️';
+      localStorage.setItem('theme', 'dark');
+    }
+  });
+
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  themeToggleBtn.textContent = savedTheme === 'dark' ? 'Mode / ☀️' : 'Mode / 🌙';
+}
     
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment_success') === 'true') {
