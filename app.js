@@ -8,17 +8,7 @@ let selectedPlan = null;
 let selectedPrice = null;
 let isSignUpMode = true;
 
-document.addEventListener('DOMContentLoaded', () => {
-    checkUserSession();
-    initEventListeners();
-    
-    // Check if the user just came back from Paymob Checkout redirect
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_success') === 'true') {
-        showNotification('Payment verified successfully! Your portfolio code is downloading.', 'success');
-        triggerStaticCodeDownload();
-    }
-});
+
 function showNotification(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
