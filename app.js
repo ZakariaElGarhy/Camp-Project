@@ -243,7 +243,7 @@ document.getElementById('pay-download-btn').addEventListener('click', async () =
     };
 
     // 2. Save/Upsert values into Supabase portfolios table
-    const { error: dbError } = await supabase
+    const { error: dbError } = await supabaseClient
         .from('portfolios')
         .upsert(portfolioData, { onConflict: 'user_id' });
 
@@ -264,9 +264,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         showNotification('Payment verified successfully!', 'success');
         
         // Fetch the saved portfolio record from Supabase
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (session) {
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('portfolios')
                 .select('*')
                 .eq('user_id', session.user.id)
