@@ -977,6 +977,107 @@ h3,
   font-weight: 700;
 }
 
+/* Orders / Vault Section Style */
+.orders-section {
+  padding: 9rem 6vw 10rem;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  min-height: 80vh;
+}
+
+.orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  max-width: 1180px;
+  margin: 0 auto 3.5rem;
+  text-align: left;
+}
+
+.orders-header h2 {
+  font-size: clamp(2.8rem, 5vw, 5.5rem);
+  line-height: 0.9;
+}
+
+.orders-header p {
+  color: var(--text-muted);
+  max-width: 300px;
+  font-size: 0.84rem;
+}
+
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.order-card {
+  background: rgba(251, 250, 245, 0.72);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow);
+  background: var(--bg-card);
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.2rem;
+}
+
+.order-plan {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  letter-spacing: -0.04em;
+}
+
+.order-price {
+  color: var(--coral);
+  font: 600 1.2rem var(--font-heading);
+}
+
+.order-details {
+  margin-bottom: 1.5rem;
+}
+
+.order-details p {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  margin-bottom: 0.4rem;
+}
+
+.order-date {
+  font: 0.62rem monospace;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.order-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

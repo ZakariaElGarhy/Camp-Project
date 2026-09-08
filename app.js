@@ -257,6 +257,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
+
+                await supabaseClient.from('orders').insert({
+                user_id: session.user.id,
+                plan_name: 'Atelier Portfolio Export',
+                amount: '$29',
+                portfolio_name: document.getElementById('p-name')?.value || 'Custom Portfolio'
+            });
+
                 const { data, error } = await supabaseClient
                     .from('portfolios')
                     .select('*')
@@ -279,6 +287,66 @@ document.addEventListener('DOMContentLoaded', async () => {
             template_class: document.getElementById('live-preview')?.className || 'minimalist'
         });
     }
+});
+
+async function loadUserOrders() {
+    const ordersListContainer = document.getElementById('orders-list');
+    if (!ordersListContainer) return;
+
+    if (!supabaseClient) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    
+    if (!session) {
+        showNotification('Please sign in to view your order archive.', 'error');
+        document.getElementById('auth-modal').classList.remove('hidden');
+        return;
+    }
+
+    // Toggle view sections (Hide builder/pricing, show orders section)
+    document.querySelector('.hero').style.display = 'none';
+    document.querySelector('.pricing-section').style.display = 'none';
+    document.querySelector('.builder-section').style.display = 'none';
+    document.getElementById('orders-section').classList.remove('hidden');
+
+    // Fetch orders from Supabase
+    const { data: orders, error } = await supabaseClient
+        .from('orders')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+    if (error || !orders || orders.length === 0) {
+        ordersListContainer.innerHTML = `
+            <div class="order-empty-state">
+                <p>No prior acquisitions found in your session vault.</p>
+            </div>`;
+        return;
+    }
+
+    // Render orders
+    ordersListContainer.innerHTML = orders.map(order => `
+        <div class="order-card">
+            <div>
+                <div class="order-card-header">
+                    <span class="order-plan">${order.plan_name}</span>
+                    <span class="order-price">${order.amount}</span>
+                </div>
+                <div class="order-details">
+                    <p><strong>Portfolio Name:</strong> ${order.portfolio_name || 'Untitled'}</p>
+                    <p><strong>Status:</strong> <span style="color: var(--lime);">Verified & Compiled</span></p>
+                </div>
+            </div>
+            <div class="order-date">
+                Acquired on: ${new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+        </div>
+    `).join('');
+}
+
+// Attach event listener to nav link
+document.getElementById('nav-orders-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    loadUserOrders();
 });
 // Ensure this function is correctly declared in your global scope:
 function triggerStaticCodeDownloadWithData(portfolio) {
