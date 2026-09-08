@@ -263,10 +263,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (urlParams.get('payment_success') === 'true') {
         showNotification('Payment verified successfully!', 'success');
         
-        // Fetch the saved portfolio record from Supabase
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         if (session) {
-            const { data, error } = await supabaseClient
+            const { data, error } = await supabase
                 .from('portfolios')
                 .select('*')
                 .eq('user_id', session.user.id)
@@ -275,18 +274,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (data && !error) {
                 triggerStaticCodeDownloadWithData(data);
             } else {
-                showNotification('Could not retrieve saved portfolio data.', 'error');
+                // Fallback if row wasn't fetched, use what's currently in form inputs
+                triggerStaticCodeDownloadWithData({
+                    full_name: document.getElementById('p-name')?.value || 'Alexander Wright',
+                    bio: document.getElementById('p-bio')?.value || 'Curator of digital environments.',
+                    image_url: document.getElementById('p-img')?.value || '',
+                    socials: document.getElementById('p-socials')?.value || '',
+                    template_class: document.getElementById('live-preview')?.className || 'minimalist'
+                });
             }
         }
     }
 });
-function triggerStaticCodeDownload(portfolio) {
-const name = portfolio.full_name;
-    const bio = portfolio.bio;
-    const imgUrl = portfolio.image_url;
-    const socials = portfolio.socials;
-    const templateClass = portfolio.template_class;
-    // Fully self-contained single HTML file with full-page styling
+
+// Ensure this function is correctly declared in your global scope:
+function triggerStaticCodeDownloadWithData(portfolio) {
+    const name = portfolio?.full_name || 'Alexander Wright';
+    const bio = portfolio?.bio || 'Curator of digital environments.';
+    const imgUrl = portfolio?.image_url || '';
+    const socials = portfolio?.socials || '';
+    const templateClass = portfolio?.template_class || 'minimalist';
+
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -303,7 +311,6 @@ const name = portfolio.full_name;
             --font-body: 'Inter', sans-serif;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body.standalone-body {
             width: 100vw;
             height: 100vh;
@@ -311,7 +318,6 @@ const name = portfolio.full_name;
             font-family: var(--font-body);
             overflow: hidden;
         }
-
         .template-preview {
             width: 100vw;
             height: 100vh;
@@ -319,11 +325,7 @@ const name = portfolio.full_name;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border-radius: 0;
-            box-shadow: none;
-            max-width: none;
         }
-
         .template-preview.minimalist { background: #fdfbf7; color: #1a1a1a; }
         .template-preview.minimalist .preview-logo { color: #1a1a1a; }
         .template-preview.editorial { background: #0d0d0d; color: #ffffff; }
@@ -332,10 +334,9 @@ const name = portfolio.full_name;
         .template-preview.warm .preview-logo { color: #d4af37; }
 
         .preview-nav { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .preview-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.4rem; letter-spacing: -0.5px; }
+        .preview-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.4rem; }
         .preview-nav-links { display: flex; gap: 2.5rem; font-size: 0.95rem; }
-        .preview-nav-links a { text-decoration: none; color: inherit; opacity: 0.8; transition: opacity 0.2s; }
-        .preview-nav-links a:hover { opacity: 1; }
+        .preview-nav-links a { text-decoration: none; color: inherit; opacity: 0.8; }
         
         .preview-body { text-align: center; max-width: 600px; margin: 0 auto; width: 100%; }
         .preview-footer { text-align: center; font-size: 0.85rem; opacity: 0.6; width: 100%; }
@@ -351,9 +352,7 @@ const name = portfolio.full_name;
         
         h1 { font-family: var(--font-heading); font-size: 3.5rem; margin-bottom: 1rem; font-weight: 600; }
         p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
-        
         .socials-list { margin-top: 1.5rem; display: flex; gap: 1.5rem; justify-content: center; font-size: 0.95rem; font-weight: 500; }
-        .hidden { display: none !important; }
     </style>
 </head>
 <body class="standalone-body">
