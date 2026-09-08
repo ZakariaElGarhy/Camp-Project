@@ -224,13 +224,68 @@ function setupPlanConfigurationUI(plan) {
     window.scrollTo({ top: document.getElementById('builder-section').offsetTop, behavior: 'smooth' });
 }
 
-function triggerStaticCodeDownload() {
-    const name = document.getElementById('p-name').value || 'Alexander Wright';
-    const bio = document.getElementById('p-bio').value || 'Curator of digital environments.';
-    const imgUrl = document.getElementById('p-img') ? document.getElementById('p-img').value : '';
-    const socials = document.getElementById('p-socials') ? document.getElementById('p-socials').value : '';
-    const templateClass = document.getElementById('live-preview').className;
+// Inside initEventListeners or your Pay button handler:
+document.getElementById('pay-download-btn').addEventListener('click', async () => {
+    if (!currentUser) {
+        showNotification('Please sign in or register first.', 'error');
+        document.getElementById('auth-modal').classList.remove('hidden');
+        return;
+    }
 
+    // 1. Gather current values from the form inputs
+    const portfolioData = {
+        user_id: currentUser.id,
+        full_name: document.getElementById('p-name').value || 'Alexander Wright',
+        bio: document.getElementById('p-bio').value || 'Curator of digital environments.',
+        image_url: document.getElementById('p-img') ? document.getElementById('p-img').value : '',
+        socials: document.getElementById('p-socials') ? document.getElementById('p-socials').value : '',
+        template_class: document.getElementById('live-preview').className
+    };
+
+    // 2. Save/Upsert values into Supabase portfolios table
+    const { error: dbError } = await supabase
+        .from('portfolios')
+        .upsert(portfolioData, { onConflict: 'user_id' });
+
+    if (dbError) {
+        showNotification('Error saving portfolio data: ' + dbError.message, 'error');
+        return;
+    }
+
+    // 3. Proceed to Paymob Checkout
+    await redirectToPaymobCheckout(selectedPrice);
+});
+document.addEventListener('DOMContentLoaded', async () => {
+    checkUserSession();
+    initEventListeners();
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true') {
+        showNotification('Payment verified successfully!', 'success');
+        
+        // Fetch the saved portfolio record from Supabase
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const { data, error } = await supabase
+                .from('portfolios')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+                
+            if (data && !error) {
+                triggerStaticCodeDownloadWithData(data);
+            } else {
+                showNotification('Could not retrieve saved portfolio data.', 'error');
+            }
+        }
+    }
+});
+function triggerStaticCodeDownload() {
+const name = portfolio.full_name;
+    const bio = portfolio.bio;
+    const imgUrl = portfolio.image_url;
+    const socials = portfolio.socials;
+    const templateClass = portfolio.template_class;
     // Fully self-contained single HTML file with full-page styling
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
