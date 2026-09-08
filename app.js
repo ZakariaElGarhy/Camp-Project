@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 });
-function triggerStaticCodeDownload() {
+function triggerStaticCodeDownload(portfolio) {
 const name = portfolio.full_name;
     const bio = portfolio.bio;
     const imgUrl = portfolio.image_url;
