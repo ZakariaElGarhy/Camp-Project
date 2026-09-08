@@ -263,30 +263,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (urlParams.get('payment_success') === 'true') {
         showNotification('Payment verified successfully!', 'success');
         
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-            const { data, error } = await supabase
-                .from('portfolios')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .single();
-                
-            if (data && !error) {
-                triggerStaticCodeDownloadWithData(data);
-            } else {
-                // Fallback if row wasn't fetched, use what's currently in form inputs
-                triggerStaticCodeDownloadWithData({
-                    full_name: document.getElementById('p-name')?.value || 'Alexander Wright',
-                    bio: document.getElementById('p-bio')?.value || 'Curator of digital environments.',
-                    image_url: document.getElementById('p-img')?.value || '',
-                    socials: document.getElementById('p-socials')?.value || '',
-                    template_class: document.getElementById('live-preview')?.className || 'minimalist'
-                });
+        // Using your correct client name: supabaseClient
+        if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const { data, error } = await supabaseClient
+                    .from('portfolios')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .single();
+                    
+                if (data && !error) {
+                    triggerStaticCodeDownloadWithData(data);
+                    return;
+                }
             }
         }
+        
+        // Fallback download if session/database fetch is skipped
+        triggerStaticCodeDownloadWithData({
+            full_name: document.getElementById('p-name')?.value || 'Alexander Wright',
+            bio: document.getElementById('p-bio')?.value || 'Curator of digital environments.',
+            image_url: document.getElementById('p-img')?.value || '',
+            socials: document.getElementById('p-socials')?.value || '',
+            template_class: document.getElementById('live-preview')?.className || 'minimalist'
+        });
     }
 });
-
 // Ensure this function is correctly declared in your global scope:
 function triggerStaticCodeDownloadWithData(portfolio) {
     const name = portfolio?.full_name || 'Alexander Wright';
