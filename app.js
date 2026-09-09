@@ -9,6 +9,92 @@ let currentUser = null;
 let selectedTierPrice = 300; 
 let selectedTierName = 'Starter Tier';
 let paymobPublicKey = 'egy_pk_test_vbzbYyPBfnFoppIsamCZl2ZmO2HiqJef';
+
+const allPortfolioThemes = [
+    ['Midnight', '#242a30', '#f5f7f7', '#8da9bd'],
+    ['Paper', '#f4f0e8', '#191a18', '#9c978d'],
+    ['Slate', '#52606b', '#f5f7f8', '#a9c8dc'],
+    ['Mono', '#111111', '#f4f4f0', '#929292'],
+    ['Ivory', '#eee5d2', '#33271f', '#c5b28e'],
+    ['Graphite', '#303338', '#e7e8e5', '#a7adb5'],
+    ['Snow', '#fbfcfa', '#20252a', '#b8d2e4'],
+    ['Stone', '#b4aa99', '#171614', '#d5bf9b'],
+    ['Ink', '#15191b', '#f0e8d8', '#ba716b'],
+    ['Fog', '#d8dadd', '#252a2d', '#8d969d'],
+    ['Clean Code', '#f8faf7', '#14263b', '#71a47b'],
+    ['Devfolio', '#17283c', '#f4f8fb', '#67b7c8'],
+    ['Terminal Lite', '#252b28', '#e8ede5', '#83aa86'],
+    ['System', '#d1d5d8', '#151a20', '#7597ba'],
+    ['Blueprint', '#173553', '#dbeeff', '#83bfe8'],
+    ['Git', '#faf9f5', '#202326', '#d87839'],
+    ['Framework', '#36383d', '#f5f5f2', '#b09bd0'],
+    ['Compile', '#101212', '#d6d7d3', '#b7cf62'],
+    ['Stack', '#f8faf9', '#152d46', '#5eb9c7'],
+    ['Source', '#eee6d5', '#171512', '#c88655'],
+    ['The Journal', '#f1e9d9', '#1c1916', '#a79b8b'],
+    ['Studio', '#f8f7f3', '#181817', '#aaa398'],
+    ['Archive', '#d5c3a5', '#32251d', '#a45d5b'],
+    ['Index', '#fbfbf8', '#272b2d', '#8a9195'],
+    ['Column', '#eeeae0', '#171c19', '#63836d'],
+    ['Dispatch', '#ede5d7', '#14283d', '#8897a5'],
+    ['Type', '#151515', '#f2f0e9', '#a5a5a0'],
+    ['Modernist', '#f8f8f6', '#141414', '#789bb4'],
+    ['Print', '#eee5d4', '#171513', '#c68557'],
+    ['Volume', '#343839', '#f0eadb', '#c0aa59'],
+    ['Obsidian', '#111214', '#f2f2ef', '#9b8bb9'],
+    ['Carbon', '#1b1d20', '#dfe2e2', '#7695ad'],
+    ['Noir', '#171416', '#f0e4d1', '#934a52'],
+    ['Velvet', '#29262e', '#f1eadc', '#9380a7'],
+    ['Eclipse', '#111417', '#dfe3e5', '#7592ae'],
+    ['Onyx', '#171a18', '#e5e8e1', '#83a681'],
+    ['After Hours', '#1d2938', '#f0e6d5', '#c4875d'],
+    ['Black Label', '#101010', '#f5f4ef', '#c3a35b'],
+    ['Nightshift', '#272e35', '#dce9f3', '#9dbbd1'],
+    ['Darkroom', '#151515', '#eee9dd', '#a95d5a'],
+    ['Sage', '#e7ebdf', '#222c26', '#7d9a78'],
+    ['Ocean', '#f5f8f7', '#122b43', '#5a9f9c'],
+    ['Sand', '#d8c3a3', '#35291f', '#8e8170'],
+    ['Clay', '#eee0d0', '#3a241b', '#bf7056'],
+    ['Moss', '#e8e8d8', '#1e3325', '#718c6a'],
+    ['Cloud', '#f8fafb', '#29333b', '#9bbbd2'],
+    ['Cedar', '#eee3d1', '#263a2b', '#876348'],
+    ['Dawn', '#f6eee3', '#2a2d2c', '#d18c69'],
+    ['Gallery', '#f2eee7', '#20201e', '#b46f4b'],
+    ['Terminal Pro', '#07130f', '#b9ffd0', '#45f28a'],
+    ['Neon Grid', '#17102b', '#f7f0ff', '#e86cff'],
+    ['Luxe', '#211d1b', '#f5ead8', '#c7a15a'],
+    ['Aurora', '#10252a', '#e4fbf3', '#72d9b0']
+].map(([name, background, color, accent]) => ({
+    name,
+    value: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    background,
+    color,
+    accent,
+    border: accent
+}));
+
+const featuredThemeNames = new Set([
+    'Midnight', 'Paper', 'Slate', 'Mono', 'Ivory',
+    'Graphite', 'Clean Code', 'Devfolio', 'Terminal Lite', 'Blueprint',
+    'Git', 'Compile', 'Stack', 'The Journal', 'Studio',
+    'Obsidian', 'Noir', 'Ocean', 'Cedar', 'Dawn',
+    'Gallery', 'Terminal Pro', 'Neon Grid', 'Luxe', 'Aurora'
+]);
+
+const portfolioThemes = allPortfolioThemes.filter(theme => featuredThemeNames.has(theme.name));
+
+function populateThemeSelector(selector) {
+    if (!selector || selector.dataset.catalogReady) return;
+    selector.innerHTML = portfolioThemes.map((theme, index) => {
+        const minimumTier = index < 10 ? 300 : index < 20 ? 600 : 3000;
+        return `<option value="${theme.value}" data-min-tier="${minimumTier}">${theme.name}${minimumTier > 300 ? ` - ${minimumTier === 600 ? 'Pro' : 'Enterprise'}` : ''}</option>`;
+    }).join('');
+    selector.dataset.catalogReady = 'true';
+}
+
+function getPortfolioTheme(value) {
+    return portfolioThemes.find(theme => theme.value === value) || portfolioThemes[0];
+}
 document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (!themeToggleBtn) return;
@@ -21,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggleBtn.setAttribute('aria-pressed', String(isDark));
 
     themeToggleBtn.addEventListener('click', () => {
+        if (document.body.classList.contains('checkout-is-loading')) return;
         const currentlyDark = document.documentElement.classList.toggle('dark-theme');
         document.body.classList.toggle('dark-theme', currentlyDark);
         
@@ -55,6 +142,9 @@ function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your 
 
     overlay.classList.toggle('hidden', !isLoading);
     document.body.classList.toggle('checkout-is-loading', isLoading);
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn?.toggleAttribute('disabled', isLoading);
+    themeToggleBtn?.setAttribute('aria-disabled', String(isLoading));
 
     if (isLoading) {
         overlay.querySelector('#checkout-loading-step').textContent = step;
@@ -115,6 +205,7 @@ document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
 
 function initPlanAndBuilderFlow() {
     const builderSection = document.getElementById('builder');
+    populateThemeSelector(document.getElementById('template-selector'));
     
     const savedPrice = sessionStorage.getItem('selectedTierPrice');
     const savedName = sessionStorage.getItem('selectedTierName');
@@ -157,6 +248,18 @@ function initPlanAndBuilderFlow() {
 
 function applyTierRestrictions(price) {
     window.selectedTierPrice = price;
+
+    const templateSelector = document.getElementById('template-selector');
+    if (templateSelector) {
+        populateThemeSelector(templateSelector);
+        templateSelector.querySelectorAll('option[data-min-tier]').forEach(option => {
+            option.disabled = price < Number(option.dataset.minTier);
+        });
+        const selectedOption = templateSelector.selectedOptions[0];
+        if (!selectedOption || selectedOption.disabled) {
+            templateSelector.value = price >= 3000 ? portfolioThemes[30].value : price >= 600 ? portfolioThemes[10].value : portfolioThemes[0].value;
+        }
+    }
 
     const imgGroup = document.getElementById('img-group');
     const contactsGroup = document.getElementById('contacts-section-wrap') || document.getElementById('contacts-container')?.closest('.form-group');
@@ -433,22 +536,15 @@ function initBuilderCanvasListeners() {
         
         if (templateSelector && livePreview) {
             const selectedTheme = templateSelector.value;
+            const theme = getPortfolioTheme(selectedTheme);
             livePreview.classList.remove('minimal', 'editorial', 'warm');
-            livePreview.classList.add(selectedTheme);
-
-            if (selectedTheme === 'editorial') {
-                livePreview.style.background = '#0d0d0d';
-                livePreview.style.color = '#f5f5f5';
-                livePreview.style.borderColor = '#333';
-            } else if (selectedTheme === 'warm') {
-                livePreview.style.background = '#f4eee1';
-                livePreview.style.color = '#2c221e';
-                livePreview.style.borderColor = '#d6ccc2';
-            } else {
-                livePreview.style.background = '#ffffff';
-                livePreview.style.color = '#111111';
-                livePreview.style.borderColor = '#e5e5e5';
-            }
+            livePreview.classList.add('theme-preview');
+            livePreview.classList.toggle('theme-special', theme.name === 'Gallery' || theme.name === 'Terminal Pro' || theme.name === 'Neon Grid' || theme.name === 'Luxe' || theme.name === 'Aurora');
+            livePreview.dataset.theme = theme.value;
+            livePreview.style.background = theme.background;
+            livePreview.style.color = theme.color;
+            livePreview.style.borderColor = theme.border;
+            livePreview.style.setProperty('--preview-accent', theme.accent);
         }
         
         if (selectedTierPrice >= 600 && imgInput && prevImgTag && prevImgWrap) {

@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260909-theme-2">
     <script>
     // Global Theme Initialization to prevent flash of wrong theme
     (function() {
@@ -17,6 +17,17 @@
         }
     })();
 </script>
+    <style>
+        /* Theme toggle button & dark theme variables matching AURA style */
+        body.dark-theme {
+            --bg-primary: #121411;
+            --bg-secondary: #1a1c18;
+            --bg-card: #1c201a;
+            --text-main: #f4f1e9;
+            --text-muted: #a0a89d;
+            --border-color: rgba(244, 241, 233, 0.15);
+        }
+    </style>
 </head>
 <body>
     <div id="toast-container"></div>
@@ -28,7 +39,7 @@
             <a href="index.html">Home</a>
             <a href="plans.html">Plans</a>
             <a href="orders.html">Orders</a>
-            <button id="theme-toggle" class="theme-toggle-btn">Dark</button>
+            <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to dark mode" aria-pressed="false">Dark</button>
 
             <!-- Unified Auth / Profile Container inside Navbar -->
             <div id="auth-container" style="position: relative; display: inline-block;">
@@ -55,17 +66,40 @@
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero home-hero">
         <div class="hero-content">
-            <span class="sub-heading">Digital Presence Architect</span>
-            <h1>Curate your digital footprint with uncompromising style.</h1>
-            <p>Design, customize, and deploy static editorial portfolios instantly.</p>
-            <a href="plans.html" class="btn-solid">Launch Workspace</a>
+            <div class="hero-kicker-row">
+                <span class="sub-heading">Digital Presence Architect</span>
+                <span class="hero-status"><i></i> System online</span>
+            </div>
+            <h1>Make your work impossible to overlook.</h1>
+            <p>Build a portfolio with the clarity of a system and the point of view of an editorial piece.</p>
+            <div class="hero-actions">
+                <a href="plans.html" class="btn-solid">Launch Workspace</a>
+                <a href="#workflow" class="hero-text-link">See the method <span>↓</span></a>
+            </div>
+            <div class="hero-details" aria-label="AURA product details">
+                <div><span>01</span><b>Compose</b><small>Live visual builder</small></div>
+                <div><span>02</span><b>Refine</b><small>25 curated themes</small></div>
+                <div><span>03</span><b>Deploy</b><small>Secure cloud launch</small></div>
+            </div>
+        </div>
+        <div class="hero-showcase" aria-label="AURA portfolio preview">
+            <div class="showcase-label">AURA / LIVE SPECIMEN <span>v. 02.26</span></div>
+            <div class="showcase-window">
+                <div class="showcase-chrome"><span></span><span></span><span></span><em>aura.preview / selected-work</em></div>
+                <div class="showcase-page">
+                    <div class="showcase-nav"><strong>AW</strong><span>WORK&nbsp;&nbsp;&nbsp; ABOUT&nbsp;&nbsp;&nbsp; CONTACT</span></div>
+                    <div class="showcase-copy"><small>Independent creative / 2026</small><h2>Ideas with<br><i>architecture.</i></h2><p>A considered space for work that deserves a longer look.</p><a href="plans.html">Explore the workspace ↗</a></div>
+                    <div class="showcase-index"><span>SELECTED / 04</span><span>SCROLL TO DISCOVER</span></div>
+                </div>
+            </div>
+            <div class="showcase-note"><span>Designed for signal.</span><span>Built for momentum.</span></div>
         </div>
     </section>
 
     <!-- How It Works Section -->
-    <section style="padding: 8rem 6vw; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+    <section id="workflow" style="padding: 8rem 6vw; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
         <div class="section-title">
             <div>
                 <span class="sub-heading">Workflow Architecture</span>

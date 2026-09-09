@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260909-theme-2">
     <script>
     // Global Theme Initialization to prevent flash of wrong theme
     (function() {
@@ -58,7 +58,7 @@
             <a href="index.html">Home</a>
             <a href="plans.html">Plans</a>
             <a href="orders.html">Orders</a>
-            <button id="theme-toggle" class="theme-toggle-btn">Dark</button>
+            <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to dark mode" aria-pressed="false">Dark</button>
 
             
             <!-- Auth Container inside Nav -->
@@ -101,7 +101,7 @@
                 <p>For independent creators launching standard portfolios.</p>
                 <ul>
                     <li>1 Standalone Portfolio Export</li>
-                    <li>Minimalist & Warm Templates</li>
+                    <li>10 curated portfolio themes</li>
                 </ul>
                 <button class="btn-outline select-plan-btn" data-template="minimalist" data-price="300" data-name="Starter Tier">Select Starter</button>
             </div>
@@ -113,7 +113,7 @@
                 <p>For designers requiring editorial studio templates.</p>
                 <ul>
                     <li>Unlimited Code Compilation</li>
-                    <li>Editorial Styles & Dynamic Work Cards</li>
+                    <li>All 20 themes & dynamic work cards</li>
                 </ul>
                 <button class="btn-solid select-plan-btn" data-template="editorial" data-price="600" data-name="AURA Pro Tier">Select Pro</button>
             </div>
@@ -124,7 +124,7 @@
                 <p>For creative agencies managing multiple distinct clients.</p>
                 <ul>
                     <li>White-Label Export Options</li>
-                    <li>Custom Domain Support</li>
+                    <li>All 25 themes & five special editions</li>
                 </ul>
                 <button class="btn-outline select-plan-btn" data-template="warm" data-price="3000" data-name="Enterprise Tier">Select Enterprise</button>
             </div>
@@ -195,7 +195,7 @@
                     <div class="form-group">
                         <label>Project Title & Description</label>
                         <input type="text" id="project-title" value="Project Monolith / 2026" placeholder="Project Name">
-                        <textarea id="project-desc" rows="2" style="margin-top:0.4rem;" placeholder="Project description">An exploration of brutalist grid layouts in browser engines.</textarea>
+                        <textarea id="project-desc" rows="2" style="margin-top:0.4rem;" placeholder="Project description">An exploration of editorial product systems.</textarea>
                     </div>
                 </div>
 
@@ -236,7 +236,7 @@
                             <div id="prev-project-card" style="background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.2rem; text-align: left; max-width: 400px; margin: 1.5rem auto 0 auto;">
                                 <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.6; margin-bottom:0.3rem;">Selected Work</div>
                                 <h4 id="prev-proj-title" style="font-family:var(--font-heading); font-size:1.1rem; margin-bottom:0.2rem;">Project Monolith / 2026</h4>
-                                <p id="prev-proj-desc" style="font-size:0.75rem; opacity:0.8;">An exploration of brutalist grid layouts in browser engines.</p>
+                                <p id="prev-proj-desc" style="font-size:0.75rem; opacity:0.8;">An exploration of editorial product systems.</p>
                             </div>
 
                             <div id="prev-socials" class="socials-list" style="margin-top: 1.5rem;">
