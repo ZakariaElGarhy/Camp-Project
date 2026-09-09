@@ -9,14 +9,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="plans-page">
+    <div id="checkout-loading" class="checkout-loading hidden" role="status" aria-live="polite" aria-label="Preparing secure checkout">
+        <div class="checkout-loading-panel">
+            <div class="checkout-loading-topline">
+                <span>AURA / SECURE HANDOFF</span>
+                <span id="checkout-loading-step">01 / 03</span>
+            </div>
+            <div class="checkout-loading-layout">
+                <div class="checkout-loading-intro">
+                    <p class="checkout-loading-kicker">Preparing your workspace</p>
+                    <h2 id="checkout-loading-title">Securing your portfolio.</h2>
+                    <p id="checkout-loading-message">Saving your build and preparing a protected payment session.</p>
+                </div>
+                <div class="checkout-loading-rail" aria-label="Checkout progress">
+                    <div class="checkout-planet" aria-hidden="true">
+                        <span class="checkout-planet-atmosphere"></span>
+                        <span class="checkout-planet-body"></span>
+                        <span class="checkout-planet-ring checkout-planet-ring-back"></span>
+                        <span class="checkout-planet-ring checkout-planet-ring-front"></span>
+                    </div>
+                    <div class="checkout-loading-rail-line" aria-hidden="true"><span></span></div>
+                    <div class="checkout-loading-step is-active"><b>01</b><span>Build saved</span></div>
+                    <div class="checkout-loading-step"><b>02</b><span>Payment secured</span></div>
+                    <div class="checkout-loading-step"><b>03</b><span>Checkout ready</span></div>
+                </div>
+            </div>
+            <div class="checkout-loading-footer">
+                <p class="checkout-loading-note">Keep this window open while we connect you to Paymob.</p>
+                <span>AURA / 2026</span>
+            </div>
+        </div>
+    </div>
     <div id="toast-container"></div>
 
     <header class="navbar">
         <div class="logo">AURA</div>
         <nav>
             <a href="index.html">Home</a>
-            <a href="plans.html">Plans & Builder</a>
+            <a href="plans.html">Plans</a>
             <a href="orders.html">Orders</a>
             
             <!-- Auth Container inside Nav -->
@@ -244,7 +275,23 @@
 
     <!-- Auth Modal Container (if needed) -->
     <div id="auth-modal" class="modal hidden">
-        <!-- Add your auth modal content here if missing -->
+       <div class="modal-content">
+            <span class="close" id="close-auth">&times;</span>
+            <span class="sub-heading">Account access</span>
+            <h2 id="auth-title">Sign In</h2>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="name@domain.com">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="auth-password" placeholder="Password">
+            </div>
+            <button id="auth-submit-btn" class="btn-solid" style="width: 100%; margin-top: 1rem;">Continue</button>
+            <p id="auth-switch-text">
+                <a href="#" id="switch-mode-link">Register</a>
+            </p>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

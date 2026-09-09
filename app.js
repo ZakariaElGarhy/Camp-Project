@@ -15,27 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     checkUserSession();
     initPlanAndBuilderFlow();
     loadUserOrdersPage();
-    
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_success') === 'true') {
-        showNotification('Payment verified successfully via Paymob!', 'success');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        if (supabaseClient) {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                const { data } = await supabaseClient
-                    .from('portfolios')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .single();
-                    
-                if (data && data.raw_html) {
-                    triggerDirectDownload(data.raw_html, data.full_name);
-                }
-            }
-        }
-    }
 });
 
 function showNotification(message, type = 'success') {
@@ -48,35 +27,57 @@ function showNotification(message, type = 'success') {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your portfolio.', message = 'Saving your build and preparing a protected payment session.') {
+    const overlay = document.getElementById('checkout-loading');
+    const checkoutButton = document.getElementById('pay-download-btn');
+    if (!overlay) return;
+
+    overlay.classList.toggle('hidden', !isLoading);
+    document.body.classList.toggle('checkout-is-loading', isLoading);
+
+    if (isLoading) {
+        overlay.querySelector('#checkout-loading-step').textContent = step;
+        overlay.querySelector('#checkout-loading-title').textContent = title;
+        overlay.querySelector('#checkout-loading-message').textContent = message;
+        const currentStep = Number.parseInt(step, 10) || 1;
+        overlay.style.setProperty('--checkout-progress', `${Math.min(currentStep / 3, 1) * 100}%`);
+        overlay.querySelectorAll('.checkout-loading-step').forEach((stepElement, index) => {
+            stepElement.classList.toggle('is-active', index < currentStep);
+        });
+        if (checkoutButton) {
+            checkoutButton.disabled = true;
+            checkoutButton.setAttribute('aria-busy', 'true');
+        }
+    } else if (checkoutButton) {
+        checkoutButton.disabled = false;
+        checkoutButton.removeAttribute('aria-busy');
+    }
+}
+
 // Function to update all avatar elements across the DOM and cache it
 function setCachedAvatar(avatarUrl) {
     if (avatarUrl) {
-        // Save to sessionStorage (persists across page reloads in the browser tab RAM)
         sessionStorage.setItem('aura_cached_avatar', avatarUrl);
     }
     
     const cachedUrl = avatarUrl || sessionStorage.getItem('aura_cached_avatar');
     
     if (cachedUrl) {
-        // Instantly populate all avatar elements on the page
         document.querySelectorAll('#nav-avatar-img, #dropdown-avatar-preview, #modal-preview-avatar').forEach(img => {
             if (img) img.src = cachedUrl;
         });
     }
 }
 
-// Inside your user session check or login success handler:
 async function handleUserSession(user) {
-    // 1. Check if we already have it in session storage to avoid layout shift/flicker instantly
     const cached = sessionStorage.getItem('aura_cached_avatar');
     if (cached) {
         setCachedAvatar(cached);
     }
 
-    // 2. Fetch fresh profile data from Supabase in the background
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabaseClient
         .from('profiles')
-        .甚至是('avatar_url') // adjust table/column names to match your schema
+        .select('avatar_url')
         .eq('id', user.id)
         .single();
 
@@ -87,10 +88,9 @@ async function handleUserSession(user) {
 
 document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
     sessionStorage.removeItem('aura_cached_avatar');
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
 });
-
 
 function initPlanAndBuilderFlow() {
     const builderSection = document.getElementById('builder');
@@ -247,7 +247,6 @@ const openProfileModal = document.getElementById('open-profile-modal');
 const signOutBtn = document.getElementById('sign-out-btn');
 const saveProfileBtn = document.getElementById('save-profile-btn');
 
-// Toggle Dropdown Menu
 if (profileTrigger) {
     profileTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -256,7 +255,6 @@ if (profileTrigger) {
     window.addEventListener('click', () => profileDropdown.classList.add('hidden'));
 }
 
-// Open/Close Profile Modal
 if (openProfileModal) {
     openProfileModal.addEventListener('click', () => {
         profileModal.classList.remove('hidden');
@@ -268,7 +266,6 @@ if (closeProfileModal) {
     closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
 }
 
-// Fetch & Populate Profile Data
 async function loadUserProfileData() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
@@ -283,7 +280,6 @@ async function loadUserProfileData() {
 
     const finalAvatar = (profile && profile.avatar_url) ? profile.avatar_url : instagramDefaultAvatar;
 
-    // Update Nav & Dropdown Previews with Instagram default fallback
     const navAvatar = document.getElementById('nav-avatar-img');
     const dropdownAvatar = document.getElementById('dropdown-avatar-preview');
     const modalPreview = document.getElementById('modal-preview-avatar');
@@ -299,7 +295,6 @@ async function loadUserProfileData() {
         document.getElementById('prof-phone').value = profile.phone || '';
         document.getElementById('dropdown-user-phone').textContent = profile.phone || 'No phone set';
 
-        // AUTO-POPULATE BUILDER IF ON PLANS PAGE
         const imgInput = document.getElementById('p-img');
         if (imgInput && profile.avatar_url) {
             imgInput.value = profile.avatar_url;
@@ -314,7 +309,6 @@ async function loadUserProfileData() {
     }
 }
 
-// Save Profile & Upload Avatar to Supabase Storage
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
@@ -327,7 +321,6 @@ if (saveProfileBtn) {
 
         showNotification('Saving profile updates...', 'info');
 
-        // Handle Avatar File Upload if chosen
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const fileExt = file.name.split('.').pop();
@@ -350,7 +343,6 @@ if (saveProfileBtn) {
             avatarUrl = publicUrlData.publicUrl;
         }
 
-        // Upsert to profiles table
         const { error } = await supabaseClient
             .from('profiles')
             .upsert({
@@ -367,27 +359,27 @@ if (saveProfileBtn) {
         } else {
             showNotification('Profile updated and synchronized!', 'success');
             profileModal.classList.add('hidden');
-            loadUserProfileData(); // Refresh UI layout bindings
+            loadUserProfileData(); 
         }
     });
 }
 
-// Auth State Listener
 supabaseClient.auth.onAuthStateChange((event, session) => {
     const authBtn = document.getElementById('auth-btn');
     const profileTrigger = document.getElementById('profile-menu-trigger');
 
     if (session) {
+        currentUser = session.user;
         if (authBtn) authBtn.classList.add('hidden');
         if (profileTrigger) profileTrigger.classList.remove('hidden');
-        loadUserProfileData(); // Fetch profile details on login
+        loadUserProfileData(); 
     } else {
+        currentUser = null;
         if (authBtn) authBtn.classList.remove('hidden');
         if (profileTrigger) profileTrigger.classList.add('hidden');
     }
 });
 
-// Sign Out Action
 if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
@@ -525,6 +517,7 @@ function initBuilderCanvasListeners() {
                 document.getElementById('auth-modal')?.classList.remove('hidden');
                 return;
             }
+            setCheckoutLoading(true);
 
             const previewBox = document.getElementById('live-preview');
             const fullName = nameInput?.value || 'Alexander Wright';
@@ -533,6 +526,7 @@ function initBuilderCanvasListeners() {
 
             let extractedCssText = '';
             try {
+                
                 for (let sheet of document.styleSheets) {
                     try {
                         for (let rule of sheet.cssRules) {
@@ -575,13 +569,15 @@ function initBuilderCanvasListeners() {
                     user_id: currentUser.id,
                     plan_name: selectedTierName,
                     amount: `${selectedTierPrice} EGP`,
-                    portfolio_name: fullName
+                    portfolio_name: fullName,
+                    status: 'pending'
                 });
             }
 
             showNotification(`Initializing Paymob session for ${selectedTierPrice} EGP...`, 'success');
 
             try {
+                setCheckoutLoading(true, '02 / 03', 'Building a secure checkout.', 'Your portfolio is saved. We are requesting your protected payment session.');
                 const { data, error } = await supabaseClient.functions.invoke('paymob-checkout', {
                     body: {
                         amount: selectedTierPrice,
@@ -592,13 +588,14 @@ function initBuilderCanvasListeners() {
                 if (error || !data || !data.url) {
                     throw new Error(error?.message || data?.error || 'Failed to generate checkout link.');
                 }
-
+                setCheckoutLoading(true, '03 / 03', 'Opening Paymob securely.', 'Your payment session is ready. Taking you to checkout now.');
                 showNotification('Redirecting to Paymob checkout...', 'success');
                 setTimeout(() => {
                     window.location.href = data.url;
                 }, 1000);
 
             } catch (err) {
+                setCheckoutLoading(false);
                 showNotification(err.message, 'error');
             }
         });
@@ -705,10 +702,18 @@ async function loadUserOrdersPage() {
                 </div>
                 <div class="order-details">
                     <p><strong>Portfolio:</strong> ${o.portfolio_name}</p>
-                    <p><strong>Status:</strong> <span style="color:var(--lime);">Compiled & Verified</span></p>
+                    <p><strong>Status:</strong> <span style="color:var(--lime);">${o.status === 'active' ? 'Compiled & Active' : 'Compiled & Verified'}</span></p>
                 </div>
             </div>
-            <div class="order-date">Acquired: ${new Date(o.created_at).toLocaleDateString()}</div>
+            
+            <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <div class="order-date">Acquired: ${new Date(o.created_at).toLocaleDateString()}</div>
+                ${o.live_url ? `
+                    <a href="${o.live_url}" target="_blank" class="btn-solid" style="display:inline-block; text-align:center; padding:0.4rem 0.9rem; font-size:0.75rem; text-decoration:none;">View Live Site ↗</a>
+                ` : `
+                    <span style="font-size:0.75rem; color:#e74c3c;">Deployment pending</span>
+                `}
+            </div>
         </div>
     `).join('');
 }
@@ -724,3 +729,91 @@ function triggerDirectDownload(htmlString, fullName) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+// Handle Auto-Deployment and Fallback Download after Paymob Payment Verification
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true') {
+        showNotification('Payment verified successfully via Paymob!', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        if (supabaseClient) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const { data: portfolioData } = await supabaseClient
+                    .from('portfolios')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .single();
+                    
+                if (portfolioData && portfolioData.raw_html) {
+                    // 1. Trigger local file download fallback
+                    triggerDirectDownload(portfolioData.raw_html, portfolioData.full_name);
+
+                    showNotification('Deploying your portfolio to the cloud...', 'info');
+
+                    try {
+    // Explicitly trigger Vercel Edge Function deployment
+    const { data: funcData, error: funcError } = await supabaseClient.functions.invoke('deploy-portfolio', {
+        body: { 
+            htmlContent: portfolioData.raw_html, 
+            projectName: `${session.user.email.split('@')[0]}-${portfolioData.full_name || 'portfolio'}` 
+        }
+    });
+
+    if (funcError) {
+        // If it's a FunctionsHttpError, extract the exact message returned by the server
+        let detailedMsg = funcError.message;
+        if (typeof funcError.context?.json === 'function') {
+            try {
+                const errBody = await funcError.context.json();
+                detailedMsg = errBody.error || detailedMsg;
+            } catch (e) {}
+        }
+        throw new Error(detailedMsg);
+    }
+
+    if (!funcData || !funcData.success) {
+        throw new Error(funcData?.error || 'Deployment failed');
+    }
+
+    // 1. Ensure we have a valid live URL from the Edge Function
+const liveUrl = funcData.liveUrl;
+const targetProjectName = portfolioData.full_name || 'portfolio';
+
+// Insert the order with all required columns populated
+// Insert the order matching your exact table schema
+const { error: insertError } = await supabaseClient
+    .from('orders')
+    .insert([
+        {
+            user_id: session.user.id,
+            plan_name: portfolioData.plan_name || 'Portfolio Plan',
+            amount: String(portfolioData.amount || '3000'), // Stored as text in your schema
+            project_name: targetProjectName,
+            portfolio_name: portfolioData.portfolio_name || targetProjectName,
+            live_url: liveUrl,
+            status: 'active'
+        }
+    ]);
+
+if (insertError) {
+    console.error('Failed to save order to database:', insertError.message);
+    showNotification('Deployment went live, but failed to save order: ' + insertError.message, 'error');
+    return;
+}
+
+
+
+showNotification('Deployment successful! Order saved to your vault.', 'success');
+loadUserOrdersPage();
+
+} catch (err) {
+    console.error('Deployment Exception:', err);
+    showNotification('Cloud deployment note: ' + err.message, 'error');
+}
+                }
+            }
+        }
+    }
+});
