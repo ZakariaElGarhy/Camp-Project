@@ -20,8 +20,6 @@
   --font-body: "Inter", sans-serif;
 }
 
-
-
 /* High-contrast, crystal-clear dark mode */
 html.dark-theme {
   --bg-primary: #14150f;
@@ -31,7 +29,8 @@ html.dark-theme {
   --accent-warm-hover: #d8d9cc;
   --text-main-dark: #171916;
   --text-main: #f4f1e9;
-  --text-muted: #687066;
+  --text-muted: #aab5a6;
+  --accent-ink: #101411;
   --border-color: rgba(244, 241, 233, 0.12);
   --radius: 18px;
   --radius-sm: 999px;
@@ -41,8 +40,6 @@ html.dark-theme {
   --font-heading: "Playfair Display", Georgia, serif;
   --font-body: "Inter", sans-serif;
 }
-
-
 
 * {
   box-sizing: border-box;
@@ -57,7 +54,9 @@ body {
   font-family: var(--font-body);
   line-height: 1.6;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 /* Background grain overlay */
@@ -72,15 +71,15 @@ body::before {
 }
 
 /* Force form inputs & dropdowns to respect dark mode nicely */
-html.dark-theme input, 
-html.dark-theme select, 
+html.dark-theme input,
+html.dark-theme select,
 html.dark-theme textarea {
   background-color: #171b16 !important;
   color: #f8faf5 !important;
   border-color: rgba(255, 255, 255, 0.25) !important;
 }
 
-html.dark-theme input::placeholder, 
+html.dark-theme input::placeholder,
 html.dark-theme textarea::placeholder {
   color: #8c9687 !important;
 }
@@ -285,7 +284,7 @@ h3,
 
 .btn-solid {
   background: var(--lime);
-  color: var(--text-main);
+  color: var(--accent-ink, #171916);
   border: none;
   box-shadow: 0 8px 20px rgba(165, 194, 37, 0.22);
 }
@@ -457,7 +456,7 @@ h3,
 }
 
 .pricing-card.featured {
-  background: var(-);
+  background: var(--text-main);
   border-color: var(--text-main);
   color: var(--bg-primary);
   transform: translateY(-14px);
@@ -2233,5 +2232,124 @@ h3,
 
   .checkout-planet::after {
     animation: none;
+  }
+}
+
+/* Dark theme surfaces and contrast corrections. Keep bright accents, but use deep ink on them. */
+html.dark-theme body {
+  background: var(--bg-primary);
+  color: var(--text-main);
+}
+
+html.dark-theme .navbar,
+html.dark-theme .plans-page .navbar,
+html.dark-theme .orders-page .navbar {
+  background: rgba(20, 21, 15, 0.9);
+  border-bottom-color: var(--border-color);
+}
+
+html.dark-theme .hero {
+  background:
+    radial-gradient(
+      circle at 77% 22%,
+      rgba(212, 242, 59, 0.22),
+      transparent 0 19%
+    ),
+    linear-gradient(118deg, #14150f 0 52%, #252b1d 52% 100%);
+}
+
+html.dark-theme .hero::after {
+  color: rgba(244, 241, 233, 0.06);
+}
+
+html.dark-theme .pricing-card,
+html.dark-theme .plans-page .pricing-card,
+html.dark-theme .order-card,
+html.dark-theme .orders-page .order-card {
+  background: #21231a;
+  border-color: var(--border-color);
+}
+
+html.dark-theme .pricing-card:hover,
+html.dark-theme .plans-page .pricing-card:hover,
+html.dark-theme .order-card:hover,
+html.dark-theme .orders-page .order-card:hover {
+  background: #2b3020;
+}
+
+html.dark-theme .pricing-card.featured,
+html.dark-theme .plans-page .pricing-card.featured {
+  background: var(--lime);
+  border-color: var(--lime);
+  color: var(--accent-ink);
+}
+
+html.dark-theme .pricing-card.featured h3,
+html.dark-theme .pricing-card.featured .plan-index,
+html.dark-theme .plans-page .pricing-card.featured h3,
+html.dark-theme .plans-page .pricing-card.featured .plan-index,
+html.dark-theme .plans-page .pricing-card.featured .price,
+html.dark-theme .plans-page .pricing-card.featured p,
+html.dark-theme .plans-page .pricing-card.featured li,
+html.dark-theme .plans-page .pricing-card.featured li::before {
+  color: var(--accent-ink);
+}
+
+html.dark-theme .plans-page .pricing-card.featured ul {
+  border-color: rgba(16, 20, 17, 0.25);
+}
+
+html.dark-theme .plans-page .enterprise-card {
+  background: #20251b;
+  border-color: var(--border-color);
+}
+
+html.dark-theme .plans-page .enterprise-card .btn-outline {
+  background: var(--lime);
+  border-color: var(--accent-ink);
+  color: var(--accent-ink);
+}
+
+html.dark-theme .builder-section {
+  background: #191d15;
+}
+
+html.dark-theme .builder-canvas {
+  background: #282d20;
+}
+
+html.dark-theme .builder-controls,
+html.dark-theme .modal-content,
+html.dark-theme .profile-dropdown {
+  background: #1c2018 !important;
+  border-color: var(--border-color) !important;
+  box-shadow: var(--shadow);
+}
+
+html.dark-theme input,
+html.dark-theme select,
+html.dark-theme textarea,
+html.dark-theme input:disabled {
+  background: #171b16 !important;
+  color: #f4f1e9 !important;
+  border-color: var(--border-color) !important;
+}
+
+html.dark-theme .modal {
+  background: rgba(3, 5, 3, 0.8);
+}
+
+html.dark-theme .orders-page .orders-header,
+html.dark-theme .orders-page .order-date {
+  border-color: var(--border-color);
+}
+
+html.dark-theme .checkout-loading-step.is-active b {
+  color: var(--accent-ink);
+}
+
+@media (max-width: 700px) {
+  .theme-toggle-btn {
+    padding: 0.5rem 0.65rem;
   }
 }

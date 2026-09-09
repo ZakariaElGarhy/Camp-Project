@@ -13,9 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const themeToggleBtn = document.getElementById('theme-toggle');
     if (!themeToggleBtn) return;
 
-    // Set initial button text based on current state
     const isDark = localStorage.getItem('aura_theme') === 'dark';
+    document.documentElement.classList.toggle('dark-theme', isDark);
+    document.body.classList.toggle('dark-theme', isDark);
     themeToggleBtn.textContent = isDark ? 'Light' : 'Dark';
+    themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggleBtn.setAttribute('aria-pressed', String(isDark));
 
     themeToggleBtn.addEventListener('click', () => {
         const currentlyDark = document.documentElement.classList.toggle('dark-theme');
@@ -23,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         localStorage.setItem('aura_theme', currentlyDark ? 'dark' : 'light');
         themeToggleBtn.textContent = currentlyDark ? 'Light' : 'Dark';
+        themeToggleBtn.setAttribute('aria-label', currentlyDark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggleBtn.setAttribute('aria-pressed', String(currentlyDark));
     });
 });
 document.addEventListener('DOMContentLoaded', async () => {
