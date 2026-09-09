@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA / Plans & Pricing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toast-container"></div>
+
+    <header class="navbar">
+        <div class="logo">AURA</div>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="plans.html">Plans & Builder</a>
+            <a href="orders.html">Orders</a>
+            
+            <!-- Auth Container inside Nav -->
+            <div id="auth-container" style="position: relative; display: inline-block;">
+                <button id="auth-btn" class="btn-outline">Sign In</button>
+                
+                <div id="profile-menu-trigger" class="hidden" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                    <img id="nav-avatar-img" src="" alt="Avatar" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
+                </div>
+
+                <!-- Dropdown Menu -->
+                <div id="profile-dropdown" class="hidden" style="position: absolute; right: 0; top: 50px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1rem; z-index: 1000; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+                        <img id="dropdown-avatar-preview" src="" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        <div style="overflow: hidden;">
+                            <p id="dropdown-user-email" style="font-size: 0.8rem; font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                            <p id="dropdown-user-phone" style="font-size: 0.75rem; color: var(--text-muted, #777); margin: 0;">No phone set</p>
+                        </div>
+                    </div>
+                    <button id="open-profile-modal" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: var(--text-main); cursor: pointer; font-size: 0.85rem; border-radius: 6px; margin-bottom: 0.25rem;">Edit Profile</button>
+                    <button id="sign-out-btn" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: #e74c3c; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">Sign Out</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="pricing-section" style="padding-top: 10rem;">
+        <div class="section-title">
+            <div>
+                <span class="sub-heading">Investment Tiers</span>
+                <h2>Membership Plans</h2>
+            </div>
+            <p>Select your tier to unlock the builder workspace and generate your portfolio.</p>
+        </div>
+
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Starter</h3>
+                <div class="price">300 EGP</div>
+                <p>For independent creators launching standard portfolios.</p>
+                <ul>
+                    <li>1 Standalone Portfolio Export</li>
+                    <li>Minimalist & Warm Templates</li>
+                </ul>
+                <button class="btn-outline select-plan-btn" data-template="minimalist" data-price="300" data-name="Starter Tier">Select Starter</button>
+            </div>
+
+            <div class="pricing-card featured">
+                <span class="badge">Most Popular</span>
+                <h3>AURA Pro</h3>
+                <div class="price">600 EGP</div>
+                <p>For designers requiring editorial studio templates.</p>
+                <ul>
+                    <li>Unlimited Code Compilation</li>
+                    <li>Editorial Styles & Dynamic Work Cards</li>
+                </ul>
+                <button class="btn-solid select-plan-btn" data-template="editorial" data-price="600" data-name="AURA Pro Tier">Select Pro</button>
+            </div>
+
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <div class="price">3000 EGP</div>
+                <p>For creative agencies managing multiple distinct clients.</p>
+                <ul>
+                    <li>White-Label Export Options</li>
+                    <li>Custom Domain Support</li>
+                </ul>
+                <button class="btn-outline select-plan-btn" data-template="warm" data-price="3000" data-name="Enterprise Tier">Select Enterprise</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Builder Workspace Section -->
+    <section id="builder" class="builder-section" style="display: none; padding: 4rem 2rem;">
+        <div class="builder-header">
+            <div>
+                <span class="sub-heading" id="active-tier-label">Workspace Active</span>
+                <h2>Portfolio Composer</h2>
+            </div>
+            <p>Modify typography profiles, add contact vectors, structured work cards, and live links.</p>
+        </div>
+
+        <div class="builder-container" style="grid-template-columns: 1fr 1.4fr;">
+            <div class="builder-controls">
+                <h3>Identity & Core</h3>
+                <div class="form-group">
+                    <label>Choose Template Theme</label>
+                    <select id="template-selector" style="width:100%; background:var(--bg-primary); color:var(--text-main); border:1px solid var(--border-color); border-radius:10px; padding:0.6rem;">
+                        <option value="minimal">Minimalist (Clean White)</option>
+                        <option value="editorial">Editorial (Dark Contrast)</option>
+                        <option value="warm">Warm Terracotta</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="p-name" value="Alexander Wright" placeholder="Your Name">
+                </div>
+                <div class="form-group">
+                    <label>Biography / Statement</label>
+                    <textarea id="p-bio" rows="3" placeholder="Short bio...">Curator of digital environments & spatial interfaces.</textarea>
+                </div>
+                
+                <div class="form-group" id="img-group">
+                    <label>Profile Image URL</label>
+                    <input type="text" id="p-img" placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <div id="contacts-section-wrap">
+                    <h3 style="margin-top: 1.5rem;">Contact Vectors</h3>
+                    <div id="contacts-container">
+                        <div class="form-group dynamic-row">
+                            <input type="text" placeholder="Email or Phone (+1...)" class="contact-input" value="Zakaria@AURA.co">
+                        </div>
+                    </div>
+                    <button type="button" id="add-contact-btn" class="btn-outline" style="font-size:0.65rem; padding: 0.4rem 0.8rem; margin-bottom: 1.2rem;">+ Add Contact Field</button>
+
+                    <h3>Social Links</h3>
+                    <div id="socials-container">
+                        <div class="form-group dynamic-row" style="display:flex; gap:0.5rem;">
+                            <select class="social-platform" style="background:var(--bg-primary); color:var(--text-main); border:1px solid var(--border-color); border-radius:10px; padding:0.5rem;">
+                                <option value="GitHub">GitHub</option>
+                                <option value="Twitter">Twitter / X</option>
+                                <option value="LinkedIn">LinkedIn</option>
+                                <option value="Instagram">Instagram</option>
+                            </select>
+                            <input type="text" placeholder="https://profile-url" class="social-url" style="flex-grow:1;" value="https://github.com">
+                        </div>
+                    </div>
+                    <button type="button" id="add-social-btn" class="btn-outline" style="font-size:0.65rem; padding: 0.4rem 0.8rem; margin-bottom: 1.5rem;">+ Add Social Link</button>
+                </div>
+
+                <div id="project-section-wrap">
+                    <h3>Featured Project Card</h3>
+                    <div class="form-group">
+                        <label>Project Title & Description</label>
+                        <input type="text" id="project-title" value="Project Monolith / 2026" placeholder="Project Name">
+                        <textarea id="project-desc" rows="2" style="margin-top:0.4rem;" placeholder="Project description">An exploration of brutalist grid layouts in browser engines.</textarea>
+                    </div>
+                </div>
+
+                <button id="pay-download-btn" class="btn-solid" style="width:100%; margin-top: 1rem; text-align:center;">Proceed to Paymob Checkout</button>
+            </div>
+
+            <div class="builder-canvas">
+                <div class="mac-browser" style="min-height: 650px;">
+                    <div class="mac-header">
+                        <div class="mac-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="mac-url-bar">https://AURA.preview/user-portfolio</div>
+                    </div>
+                    <div id="live-preview" class="template-preview minimal" style="min-height: 600px; padding: 3rem 4rem;">
+                        <header class="preview-nav">
+                            <span id="prev-logo" class="preview-logo">AW</span>
+                            <nav class="preview-nav-links">
+                                <a href="#work">Work</a>
+                                <a href="#about">About</a>
+                                <a href="#contact">Contact</a>
+                            </nav>
+                        </header>
+                        
+                        <div class="preview-body" style="margin: auto 0;">
+                            <div id="prev-img-wrap" class="preview-img-container">
+                                <img id="prev-img-tag" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e8e8e'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Portrait">
+                            </div>
+                            <h1 id="prev-name" style="font-size: 3rem; margin-bottom: 0.8rem;">Alexander Wright</h1>
+                            <p id="prev-bio" style="max-width: 450px; margin: 0 auto 1.5rem auto;">Curator of digital environments & spatial interfaces.</p>
+                            
+                            <div id="prev-contacts" style="font-size:0.8rem; opacity:0.8; margin-bottom: 1rem; display:flex; gap:1rem; justify-content:center;">
+                                <span>✉ Zakaria@AURA.co</span>
+                            </div>
+
+                            <div id="prev-project-card" style="background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.2rem; text-align: left; max-width: 400px; margin: 1.5rem auto 0 auto;">
+                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.6; margin-bottom:0.3rem;">Selected Work</div>
+                                <h4 id="prev-proj-title" style="font-family:var(--font-heading); font-size:1.1rem; margin-bottom:0.2rem;">Project Monolith / 2026</h4>
+                                <p id="prev-proj-desc" style="font-size:0.75rem; opacity:0.8;">An exploration of brutalist grid layouts in browser engines.</p>
+                            </div>
+
+                            <div id="prev-socials" class="socials-list" style="margin-top: 1.5rem;">
+                                <span></span>
+                            </div>
+                        </div>
+
+                        <footer class="preview-footer">
+                            <p>&copy; 2026 AURA System. All rights reserved.</p>
+                        </footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Settings Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 440px; background: var(--bg-primary, #fff); border: 1px solid var(--border-color, #e2e2e2); border-radius: 16px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 0;">Profile Workspace</h2>
+                <span class="close" id="close-profile-modal" style="cursor: pointer; font-size: 1.25rem;">&times;</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">Manage your credentials and portfolio identity.</p>
+            
+            <div class="form-group" style="text-align: center; margin-bottom: 1.5rem; background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 12px; border: 1px dashed var(--border-color, #ccc);">
+                <img id="modal-preview-avatar" src="" alt="Avatar Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid var(--border-color, #ddd);">
+                <input type="file" id="avatar-file-input" accept="image/*" style="display: block; margin: 0 auto; font-size: 0.8rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Primary Email (Account)</label>
+                <input type="email" id="prof-email" disabled style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd); opacity: 0.7; background: #f5f5f5;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Secondary Email (Portfolio Contact)</label>
+                <input type="email" id="prof-sec-email" placeholder="work@domain.com" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Phone Number</label>
+                <input type="text" id="prof-phone" placeholder="+20 100 000 0000" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
+            </div>
+
+            <button id="save-profile-btn" class="btn-solid" style="width: 100%; padding: 0.75rem; border-radius: 8px; cursor: pointer;">Save Changes</button>
+        </div>
+    </div>
+
+    <!-- Auth Modal Container (if needed) -->
+    <div id="auth-modal" class="modal hidden">
+        <!-- Add your auth modal content here if missing -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>

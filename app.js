@@ -1,451 +1,726 @@
-// REPLACE with your Supabase URL and anon public key from your Project Settings > API
-const SUPABASE_URL = 'https://qvgknqjltjawewkrjwxq.supabase.co';
+// Initialize Supabase Client
+const SUPABASE_URL = 'https://qvgknqjltjawewkrjwxq.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2Z2tucWpsdGphd2V3a3Jqd3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjEyNDUsImV4cCI6MjEwNDQzNzI0NX0.5t-xOr5eG8WMROBImoqJKjJM2kKlhbU1UDo2puYkAN8';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const instagramDefaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e8e8e'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 
 let currentUser = null;
-let selectedPlan = null;
-let selectedPrice = null;
-let isSignUpMode = true;
+let selectedTierPrice = 300; 
+let selectedTierName = 'Starter Tier';
+let paymobPublicKey = 'egy_pk_test_vbzbYyPBfnFoppIsamCZl2ZmO2HiqJef';
 
-
-function showNotification(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    // Icon based on type
-    const icon = type === 'success' ? '✨' : '⚠️';
-    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
-
-    container.appendChild(toast);
-
-    // Automatically remove after 3 seconds
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
-function initEventListeners() {
-    const authBtn = document.getElementById('auth-btn');
-    const authModal = document.getElementById('auth-modal');
-    const closeModal = document.getElementById('close-modal');
-
-    authBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
-    closeModal.addEventListener('click', () => authModal.classList.add('hidden'));
-
-    const authSwitchContainer = document.getElementById('auth-switch-text');
-    authSwitchContainer.addEventListener('click', (e) => {
-        if (e.target.id === 'switch-mode') {
-            e.preventDefault();
-            isSignUpMode = !isSignUpMode;
-            document.getElementById('modal-title').textContent = isSignUpMode ? 'Create Account' : 'Sign In to Aura';
-            document.getElementById('auth-submit-btn').textContent = isSignUpMode ? 'Create Account' : 'Sign In';
-            authSwitchContainer.innerHTML = isSignUpMode 
-                ? 'Already have an account? <a href="#" id="switch-mode">Sign In</a>' 
-                : 'Don\'t have an account? <a href="#" id="switch-mode">Register</a>';
-        }
-    });
-
-    document.getElementById('auth-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('auth-email').value;
-        const password = document.getElementById('auth-password').value;
-
-        if (isSignUpMode) {
-            const { error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else {
-                showNotification('Registration successful! You can now sign in.', 'success');
-                isSignUpMode = false;
-                document.getElementById('modal-title').textContent = 'Sign In to Aura';
-                document.getElementById('auth-submit-btn').textContent = 'Sign In';
-                authSwitchContainer.innerHTML = 'Don\'t have an account? <a href="#" id="switch-mode">Register</a>';
-            }
-        } else {
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-            else {
-                currentUser = data.user;
-                authModal.classList.add('hidden');
-                updateAuthUI();
-            }
-        }
-    });
-
-    // Plan selections
-    document.querySelectorAll('.select-plan-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            if (!currentUser) {
-                showNotification('Please sign in or register first.', 'error');
-                authModal.classList.remove('hidden');
-                return;
-            }
-            const card = e.target.closest('.pricing-card');
-            selectedPlan = card.dataset.plan;
-            selectedPrice = card.dataset.price;
-
-            setupPlanConfigurationUI(selectedPlan);
-        });
-    });
-
-    // Real-time Live Preview Binding
-    document.getElementById('p-name').addEventListener('input', (e) => {
-        const val = e.target.value || 'Alexander Wright';
-        document.getElementById('prev-name').textContent = val;
-        document.getElementById('prev-nav-logo').textContent = val.split(' ').map(n => n[0]).join('');
-    });
-    
-    document.getElementById('p-bio').addEventListener('input', (e) => {
-        document.getElementById('prev-bio').textContent = e.target.value || 'Your bio statement will appear here.';
-    });
-    
-    const pImg = document.getElementById('p-img');
-    if (pImg) {
-        pImg.addEventListener('input', (e) => {
-            const imgBox = document.getElementById('prev-img-box');
-            const imgEl = document.getElementById('prev-img');
-            if (e.target.value) {
-                imgEl.src = e.target.value;
-                imgBox.classList.remove('hidden');
-            } else {
-                imgBox.classList.add('hidden');
-            }
-        });
-    }
-
-    const pSocials = document.getElementById('p-socials');
-    if (pSocials) {
-        pSocials.addEventListener('input', (e) => {
-            const box = document.getElementById('prev-socials-box');
-            if(e.target.value) {
-                box.classList.remove('hidden');
-                box.innerHTML = e.target.value.split(',').map(s => `<span>${s.trim()}</span>`).join('');
-            } else {
-                box.classList.add('hidden');
-            }
-        });
-    }
-
-    // Template switcher tabs
-    document.querySelectorAll('.template-tab').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-            document.querySelectorAll('.template-tab').forEach(t => t.classList.remove('active'));
-            e.target.classList.add('active');
-            const templateName = e.target.dataset.template;
-            const preview = document.getElementById('live-preview');
-            preview.className = `template-preview ${templateName}`;
-        });
-    });
-
-    // Open Modern Paymob Split-Screen Checkout Redirect
-    document.getElementById('pay-download-btn').addEventListener('click', async () => {
-        if (!currentUser) {
-            authModal.classList.remove('hidden');
-            return;
-        }
-        await redirectToPaymobCheckout(selectedPrice);
-    });
-}
-
-async function checkUserSession() {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (session) {
-        currentUser = session.user;
-        updateAuthUI();
-    }
-}
-
-function updateAuthUI() {
-    const authBtn = document.getElementById('auth-btn');
-    authBtn.textContent = 'Signed In';
-    authBtn.classList.remove('btn-outline');
-    authBtn.classList.add('btn-solid');
-}
-
-async function redirectToPaymobCheckout(amount) {
-    try {
-        const functionUrl = 'https://qvgknqjltjawewkrjwxq.supabase.co/functions/v1/paymob-checkout';
-        
-        const response = await fetch(functionUrl, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            },
-            body: JSON.stringify({
-                amount: parseInt(amount),
-                userEmail: currentUser.email
-            })
-        });
-        
-        const data = await response.json();
-        
-        // Check if the server returned an error property
-        if (!response.ok || data.error) {
-            console.error("Backend error details:", data);
-            showNotification('Checkout error: ' + (data.error || 'Server rejected request'), 'error');
-            return;
-        }
-        
-        if (data.client_secret) {
-            const publicKey = "egy_pk_test_vbzbYyPBfnFoppIsamCZl2ZmO2HiqJef"; 
-            const uniqueSession = new Date().getTime();
-            window.location.href = `https://eg.checkout.paymob.com/?publicKey=${publicKey}&clientSecret=${data.client_secret}&_t=${uniqueSession}`;
-        } else {
-            showNotification('Error: No client secret received from server.', 'error');
-        }
-    } catch (err) {
-        console.error("Network or parsing error:", err);
-        showNotification('Network error connecting to payment gateway.', 'error');
-    }
-}
-
-function setupPlanConfigurationUI(plan) {
-    const extraFields = document.getElementById('extra-fields');
-    if (plan === '3000') {
-        extraFields.classList.remove('hidden');
-    } else {
-        extraFields.classList.add('hidden');
-    }
-    document.getElementById('builder-section').classList.remove('hidden');
-    window.scrollTo({ top: document.getElementById('builder-section').offsetTop, behavior: 'smooth' });
-}
-
-// Inside initEventListeners or your Pay button handler:
-document.getElementById('pay-download-btn').addEventListener('click', async () => {
-    if (!currentUser) {
-        showNotification('Please sign in or register first.', 'error');
-        document.getElementById('auth-modal').classList.remove('hidden');
-        return;
-    }
-
-    // 1. Gather current values from the form inputs
-    const portfolioData = {
-        user_id: currentUser.id,
-        full_name: document.getElementById('p-name').value || 'Alexander Wright',
-        bio: document.getElementById('p-bio').value || 'Curator of digital environments.',
-        image_url: document.getElementById('p-img') ? document.getElementById('p-img').value : '',
-        socials: document.getElementById('p-socials') ? document.getElementById('p-socials').value : '',
-        template_class: document.getElementById('live-preview').className
-    };
-
-    // 2. Save/Upsert values into Supabase portfolios table
-    const { error: dbError } = await supabaseClient
-        .from('portfolios')
-        .upsert(portfolioData, { onConflict: 'user_id' });
-
-    if (dbError) {
-        showNotification('Error saving portfolio data: ' + dbError.message, 'error');
-        return;
-    }
-
-    // 3. Proceed to Paymob Checkout
-    await redirectToPaymobCheckout(selectedPrice);
-});
 document.addEventListener('DOMContentLoaded', async () => {
+    initAuthSystem();
     checkUserSession();
-    initEventListeners();
+    initPlanAndBuilderFlow();
+    loadUserOrdersPage();
     
+
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment_success') === 'true') {
-        showNotification('Payment verified successfully!', 'success');
-        
-        // Using your correct client name: supabaseClient
-        if (typeof supabaseClient !== 'undefined' && supabaseClient.auth) {
+        showNotification('Payment verified successfully via Paymob!', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+        if (supabaseClient) {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
-
-                await supabaseClient.from('orders').insert({
-                user_id: session.user.id,
-                plan_name: 'Atelier Portfolio Export',
-                amount: '$29',
-                portfolio_name: document.getElementById('p-name')?.value || 'Custom Portfolio'
-            });
-
-                const { data, error } = await supabaseClient
+                const { data } = await supabaseClient
                     .from('portfolios')
                     .select('*')
                     .eq('user_id', session.user.id)
                     .single();
                     
-                if (data && !error) {
-                    triggerStaticCodeDownloadWithData(data);
-                    return;
+                if (data && data.raw_html) {
+                    triggerDirectDownload(data.raw_html, data.full_name);
                 }
             }
         }
-        
-        // Fallback download if session/database fetch is skipped
-        triggerStaticCodeDownloadWithData({
-            full_name: document.getElementById('p-name')?.value || 'Alexander Wright',
-            bio: document.getElementById('p-bio')?.value || 'Curator of digital environments.',
-            image_url: document.getElementById('p-img')?.value || '',
-            socials: document.getElementById('p-socials')?.value || '',
-            template_class: document.getElementById('live-preview')?.className || 'minimalist'
-        });
     }
 });
 
-async function loadUserOrders() {
-    const ordersListContainer = document.getElementById('orders-list');
-    if (!ordersListContainer) return;
-
-    if (!supabaseClient) return;
-    const { data: { session } } = await supabaseClient.auth.getSession();
+function showNotification(message, type = 'success') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    const icon = type === 'success' ? '✨' : '⚠️';
+    toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+}
+// Function to update all avatar elements across the DOM and cache it
+function setCachedAvatar(avatarUrl) {
+    if (avatarUrl) {
+        // Save to sessionStorage (persists across page reloads in the browser tab RAM)
+        sessionStorage.setItem('aura_cached_avatar', avatarUrl);
+    }
     
-    if (!session) {
-        showNotification('Please sign in to view your order archive.', 'error');
-        document.getElementById('auth-modal').classList.remove('hidden');
+    const cachedUrl = avatarUrl || sessionStorage.getItem('aura_cached_avatar');
+    
+    if (cachedUrl) {
+        // Instantly populate all avatar elements on the page
+        document.querySelectorAll('#nav-avatar-img, #dropdown-avatar-preview, #modal-preview-avatar').forEach(img => {
+            if (img) img.src = cachedUrl;
+        });
+    }
+}
+
+// Inside your user session check or login success handler:
+async function handleUserSession(user) {
+    // 1. Check if we already have it in session storage to avoid layout shift/flicker instantly
+    const cached = sessionStorage.getItem('aura_cached_avatar');
+    if (cached) {
+        setCachedAvatar(cached);
+    }
+
+    // 2. Fetch fresh profile data from Supabase in the background
+    const { data: profile, error } = await supabase
+        .from('profiles')
+        .甚至是('avatar_url') // adjust table/column names to match your schema
+        .eq('id', user.id)
+        .single();
+
+    if (profile && profile.avatar_url) {
+        setCachedAvatar(profile.avatar_url);
+    }
+}
+
+document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
+    sessionStorage.removeItem('aura_cached_avatar');
+    await supabase.auth.signOut();
+    window.location.href = 'index.html';
+});
+
+
+function initPlanAndBuilderFlow() {
+    const builderSection = document.getElementById('builder');
+    
+    const savedPrice = sessionStorage.getItem('selectedTierPrice');
+    const savedName = sessionStorage.getItem('selectedTierName');
+    if (savedPrice && builderSection) {
+        selectedTierPrice = parseInt(savedPrice, 10);
+        selectedTierName = savedName || 'Starter Tier';
+        builderSection.style.display = 'block';
+        applyTierRestrictions(selectedTierPrice);
+    }
+
+    document.querySelectorAll('.select-plan-btn').forEach(trigger => {
+        trigger.addEventListener('click', (e) => {
+            if (!currentUser) {
+                showNotification('Please sign in or register first to select a plan.', 'error');
+                document.getElementById('auth-modal')?.classList.remove('hidden');
+                return;
+            }
+
+            selectedTierPrice = parseInt(e.currentTarget.getAttribute('data-price') || '300', 10);
+            selectedTierName = e.currentTarget.getAttribute('data-name') || 'Starter Tier';
+
+            sessionStorage.setItem('selectedTierPrice', selectedTierPrice);
+            sessionStorage.setItem('selectedTierName', selectedTierName);
+
+            if (builderSection) {
+                builderSection.style.display = 'block';
+                builderSection.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            applyTierRestrictions(selectedTierPrice);
+            showNotification(`Unlocked builder for ${selectedTierName} (${selectedTierPrice} EGP)!`, 'success');
+            initBuilderCanvasListeners();
+        });
+    });
+
+    if (builderSection && savedPrice) {
+        initBuilderCanvasListeners();
+    }
+}
+
+function applyTierRestrictions(price) {
+    window.selectedTierPrice = price;
+
+    const imgGroup = document.getElementById('img-group');
+    const contactsGroup = document.getElementById('contacts-section-wrap') || document.getElementById('contacts-container')?.closest('.form-group');
+    const socialsGroup = document.getElementById('socials-section-wrap') || document.getElementById('socials-container')?.closest('.form-group');
+    const projectGroup = document.getElementById('project-section-wrap') || document.getElementById('projects-container')?.closest('.form-group');
+
+    const prevImgWrap = document.getElementById('prev-img-wrap');
+    const prevContacts = document.getElementById('prev-contacts');
+    const prevSocials = document.getElementById('prev-socials');
+    const prevProjectWrap = document.getElementById('prev-project-container') || document.querySelector('.project-card-preview');
+
+    if (price === 300) {
+        if (imgGroup) imgGroup.style.display = 'none';
+        if (contactsGroup) contactsGroup.style.display = 'none';
+        if (socialsGroup) socialsGroup.style.display = 'none';
+        if (projectGroup) projectGroup.style.display = 'none';
+        
+        if (prevImgWrap) prevImgWrap.style.display = 'none';
+        if (prevContacts) prevContacts.innerHTML = '';
+        if (prevSocials) prevSocials.innerHTML = '';
+        if (prevProjectWrap) prevProjectWrap.style.display = 'none';
+    } 
+    else if (price === 600) {
+        if (imgGroup) imgGroup.style.display = 'block';
+        if (contactsGroup) contactsGroup.style.display = 'block';
+        if (socialsGroup) socialsGroup.style.display = 'block';
+        if (projectGroup) projectGroup.style.display = 'none';
+        
+        if (prevImgWrap) prevImgWrap.style.display = 'block';
+        if (prevProjectWrap) prevProjectWrap.style.display = 'none';
+        
+        updateContactsAndSocialsPreview();
+    } 
+    else {
+        if (imgGroup) imgGroup.style.display = 'block';
+        if (contactsGroup) contactsGroup.style.display = 'block';
+        if (socialsGroup) socialsGroup.style.display = 'block';
+        if (projectGroup) projectGroup.style.display = 'block';
+        
+        if (prevImgWrap) prevImgWrap.style.display = 'block';
+        if (prevProjectWrap) prevProjectWrap.style.display = 'block';
+        
+        updateContactsAndSocialsPreview();
+    }
+}
+
+function updateContactsAndSocialsPreview() {
+    if (typeof selectedTierPrice !== 'undefined' && selectedTierPrice < 600) {
+        const contactsPrev = document.getElementById('prev-contacts');
+        const socialsPrev = document.getElementById('prev-socials');
+        if (contactsPrev) contactsPrev.innerHTML = '';
+        if (socialsPrev) socialsPrev.innerHTML = '';
         return;
     }
 
-    // Toggle view sections (Hide builder/pricing, show orders section)
-    document.querySelector('.hero').style.display = 'none';
-    document.querySelector('.pricing-section').style.display = 'none';
-    document.querySelector('.builder-section').style.display = 'none';
-    document.getElementById('orders-section').classList.remove('hidden');
+    const contactInputs = document.querySelectorAll('.contact-input');
+    const contactsPrev = document.getElementById('prev-contacts');
+    if (contactsPrev) {
+        let contactsHtml = '';
+        contactInputs.forEach(input => {
+            const val = input.value.trim();
+            if (val) {
+                const isEmail = val.includes('@');
+                const iconSvg = isEmail 
+                    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`
+                    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+                contactsHtml += `<span style="display:inline-flex; align-items:center; gap:6px; margin: 0 8px; padding: 6px 12px; background: rgba(255,255,255,0.08); border-radius: 20px; font-size: 0.85rem;">${iconSvg} ${val}</span>`;
+            }
+        });
+        contactsPrev.innerHTML = contactsHtml;
+    }
 
-    // Fetch orders from Supabase
-    const { data: orders, error } = await supabaseClient
+    const socialRows = document.querySelectorAll('#socials-container .dynamic-row');
+    const socialsPrev = document.getElementById('prev-socials');
+    if (socialsPrev) {
+        let socialsHtml = '';
+        socialRows.forEach(row => {
+            const platformSelect = row.querySelector('.social-platform');
+            const platform = platformSelect ? platformSelect.value.toLowerCase() : '';
+            const url = row.querySelector('.social-url')?.value || '#';
+            
+            let svgIcon = '';
+            if (platform === 'github') {
+                svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>`;
+            } else if (platform === 'linkedin') {
+                svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>`;
+            } else if (platform === 'twitter' || platform === 'twitter / x') {
+                svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>`;
+            } else if (platform === 'instagram') {
+                svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>`;
+            } else {
+                svgIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+            }
+
+            if(url) {
+                socialsHtml += `<a href="${url}" target="_blank" title="${platform}" style="display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; text-decoration:none; margin: 0 4px; border: 1px solid currentColor; border-radius: 50%; opacity:0.85;">${svgIcon}</a>`;
+            }
+        });
+        socialsPrev.innerHTML = socialsHtml;
+    }
+}
+
+// Profile Elements Selection
+const profileTrigger = document.getElementById('profile-menu-trigger');
+const profileDropdown = document.getElementById('profile-dropdown');
+const profileModal = document.getElementById('profile-modal');
+const closeProfileModal = document.getElementById('close-profile-modal');
+const openProfileModal = document.getElementById('open-profile-modal');
+const signOutBtn = document.getElementById('sign-out-btn');
+const saveProfileBtn = document.getElementById('save-profile-btn');
+
+// Toggle Dropdown Menu
+if (profileTrigger) {
+    profileTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle('hidden');
+    });
+    window.addEventListener('click', () => profileDropdown.classList.add('hidden'));
+}
+
+// Open/Close Profile Modal
+if (openProfileModal) {
+    openProfileModal.addEventListener('click', () => {
+        profileModal.classList.remove('hidden');
+        profileDropdown.classList.add('hidden');
+        loadUserProfileData();
+    });
+}
+if (closeProfileModal) {
+    closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
+}
+
+// Fetch & Populate Profile Data
+async function loadUserProfileData() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    document.getElementById('prof-email').value = user.email;
+
+    const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    const finalAvatar = (profile && profile.avatar_url) ? profile.avatar_url : instagramDefaultAvatar;
+
+    // Update Nav & Dropdown Previews with Instagram default fallback
+    const navAvatar = document.getElementById('nav-avatar-img');
+    const dropdownAvatar = document.getElementById('dropdown-avatar-preview');
+    const modalPreview = document.getElementById('modal-preview-avatar');
+    
+    if (navAvatar) navAvatar.src = finalAvatar;
+    if (dropdownAvatar) dropdownAvatar.src = finalAvatar;
+    if (modalPreview) modalPreview.src = finalAvatar;
+
+    document.getElementById('dropdown-user-email').textContent = user.email;
+
+    if (profile) {
+        document.getElementById('prof-sec-email').value = profile.secondary_email || '';
+        document.getElementById('prof-phone').value = profile.phone || '';
+        document.getElementById('dropdown-user-phone').textContent = profile.phone || 'No phone set';
+
+        // AUTO-POPULATE BUILDER IF ON PLANS PAGE
+        const imgInput = document.getElementById('p-img');
+        if (imgInput && profile.avatar_url) {
+            imgInput.value = profile.avatar_url;
+            document.getElementById('prev-img-tag').src = profile.avatar_url;
+        }
+        if (profile.secondary_email) {
+            const contactInput = document.querySelector('.contact-input');
+            if (contactInput) contactInput.value = profile.secondary_email;
+        }
+    } else {
+        document.getElementById('dropdown-user-phone').textContent = 'No phone set';
+    }
+}
+
+// Save Profile & Upload Avatar to Supabase Storage
+if (saveProfileBtn) {
+    saveProfileBtn.addEventListener('click', async () => {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return showNotification('Please sign in first.', 'error');
+
+        let avatarUrl = document.getElementById('modal-preview-avatar').src;
+        const fileInput = document.getElementById('avatar-file-input');
+        const phone = document.getElementById('prof-phone').value;
+        const secondaryEmail = document.getElementById('prof-sec-email').value;
+
+        showNotification('Saving profile updates...', 'info');
+
+        // Handle Avatar File Upload if chosen
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabaseClient.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                showNotification('Error uploading image: ' + uploadError.message, 'error');
+                return;
+            }
+
+            const { data: publicUrlData } = supabaseClient.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            avatarUrl = publicUrlData.publicUrl;
+        }
+
+        // Upsert to profiles table
+        const { error } = await supabaseClient
+            .from('profiles')
+            .upsert({
+                id: user.id,
+                email: user.email,
+                phone: phone,
+                secondary_email: secondaryEmail,
+                avatar_url: avatarUrl,
+                updated_at: new Date()
+            });
+
+        if (error) {
+            showNotification('Error saving profile: ' + error.message, 'error');
+        } else {
+            showNotification('Profile updated and synchronized!', 'success');
+            profileModal.classList.add('hidden');
+            loadUserProfileData(); // Refresh UI layout bindings
+        }
+    });
+}
+
+// Auth State Listener
+supabaseClient.auth.onAuthStateChange((event, session) => {
+    const authBtn = document.getElementById('auth-btn');
+    const profileTrigger = document.getElementById('profile-menu-trigger');
+
+    if (session) {
+        if (authBtn) authBtn.classList.add('hidden');
+        if (profileTrigger) profileTrigger.classList.remove('hidden');
+        loadUserProfileData(); // Fetch profile details on login
+    } else {
+        if (authBtn) authBtn.classList.remove('hidden');
+        if (profileTrigger) profileTrigger.classList.add('hidden');
+    }
+});
+
+// Sign Out Action
+if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+        await supabaseClient.auth.signOut();
+        window.location.href = 'index.html';
+    });
+}
+
+function initBuilderCanvasListeners() {
+    const nameInput = document.getElementById('p-name');
+    const bioInput = document.getElementById('p-bio');
+    const imgInput = document.getElementById('p-img');
+    const projTitle = document.getElementById('project-title');
+    const projDesc = document.getElementById('project-desc');
+    const templateSelector = document.getElementById('template-selector');
+
+    const prevName = document.getElementById('prev-name');
+    const prevBio = document.getElementById('prev-bio');
+    const prevLogo = document.getElementById('prev-logo');
+    const prevImgTag = document.getElementById('prev-img-tag');
+    const prevImgWrap = document.getElementById('prev-img-wrap');
+    const prevProjTitle = document.getElementById('prev-proj-title');
+    const prevProjDesc = document.getElementById('prev-proj-desc');
+    const livePreview = document.getElementById('live-preview');
+
+    function updatePreview() {
+        const nameVal = nameInput?.value || 'Alexander Wright';
+        if (prevName) prevName.textContent = nameVal;
+        if (prevLogo) prevLogo.textContent = nameVal.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AW';
+        if (prevBio) prevBio.textContent = bioInput?.value || '';
+        
+        if (templateSelector && livePreview) {
+            const selectedTheme = templateSelector.value;
+            livePreview.classList.remove('minimal', 'editorial', 'warm');
+            livePreview.classList.add(selectedTheme);
+
+            if (selectedTheme === 'editorial') {
+                livePreview.style.background = '#0d0d0d';
+                livePreview.style.color = '#f5f5f5';
+                livePreview.style.borderColor = '#333';
+            } else if (selectedTheme === 'warm') {
+                livePreview.style.background = '#f4eee1';
+                livePreview.style.color = '#2c221e';
+                livePreview.style.borderColor = '#d6ccc2';
+            } else {
+                livePreview.style.background = '#ffffff';
+                livePreview.style.color = '#111111';
+                livePreview.style.borderColor = '#e5e5e5';
+            }
+        }
+        
+        if (selectedTierPrice >= 600 && imgInput && prevImgTag && prevImgWrap) {
+            if (imgInput.value.trim() !== '') {
+                prevImgTag.src = imgInput.value;
+                prevImgWrap.style.display = 'block';
+            } else {
+                prevImgWrap.style.display = 'none';
+            }
+        }
+
+       const prevProjectWrap = document.getElementById('prev-project-card') || document.querySelector('.project-card-preview');
+
+       if (selectedTierPrice >= 3000) {
+           if (prevProjectWrap) prevProjectWrap.style.display = 'block';
+           if (prevProjTitle) prevProjTitle.textContent = projTitle?.value || '';
+           if (prevProjDesc) prevProjDesc.textContent = projDesc?.value || '';
+       } else {
+           if (prevProjectWrap) prevProjectWrap.style.display = 'none';
+       }
+
+        updateContactsAndSocialsPreview();
+    }
+
+    [nameInput, bioInput, imgInput, projTitle, projDesc, templateSelector].forEach(el => {
+        el?.removeEventListener('input', updatePreview);
+        el?.addEventListener('input', updatePreview);
+    });
+    templateSelector?.addEventListener('change', updatePreview);
+
+    const addContactBtn = document.getElementById('add-contact-btn');
+    if (addContactBtn && !addContactBtn.hasAttribute('data-bound')) {
+        addContactBtn.setAttribute('data-bound', 'true');
+        addContactBtn.addEventListener('click', () => {
+            if (selectedTierPrice < 600) return;
+            const container = document.getElementById('contacts-container');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = 'form-group dynamic-row';
+            div.style.display = 'flex';
+            div.style.gap = '0.5rem';
+            div.style.marginBottom = '0.5rem';
+            div.innerHTML = `
+                <input type="text" placeholder="Email or Phone number" class="contact-input" style="flex-grow:1;">
+                <button type="button" class="btn-outline remove-row-btn" style="padding: 0.5rem 0.8rem; border-color:var(--coral); color:var(--coral);">×</button>
+            `;
+            container.appendChild(div);
+            div.querySelector('.contact-input').addEventListener('input', updatePreview);
+            div.querySelector('.remove-row-btn').addEventListener('click', () => { div.remove(); updatePreview(); });
+        });
+    }
+
+    const addSocialBtn = document.getElementById('add-social-btn');
+    if (addSocialBtn && !addSocialBtn.hasAttribute('data-bound')) {
+        addSocialBtn.setAttribute('data-bound', 'true');
+        addSocialBtn.addEventListener('click', () => {
+            if (selectedTierPrice < 600) return;
+            const container = document.getElementById('socials-container');
+            if (!container) return;
+            const div = document.createElement('div');
+            div.className = 'form-group dynamic-row';
+            div.style.display = 'flex';
+            div.style.gap = '0.5rem';
+            div.style.marginBottom = '0.5rem';
+            div.innerHTML = `
+                <select class="social-platform" style="background:var(--bg-primary); color:var(--text-main); border:1px solid var(--border-color); border-radius:10px; padding:0.5rem;">
+                    <option value="GitHub">GitHub</option>
+                    <option value="Twitter">Twitter / X</option>
+                    <option value="LinkedIn">LinkedIn</option>
+                    <option value="Instagram">Instagram</option>
+                </select>
+                <input type="text" placeholder="https://url" class="social-url" style="flex-grow:1;">
+                <button type="button" class="btn-outline remove-row-btn" style="padding: 0.5rem 0.8rem; border-color:var(--coral); color:var(--coral);">×</button>
+            `;
+            container.appendChild(div);
+            div.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updatePreview));
+            div.querySelector('.remove-row-btn').addEventListener('click', () => { div.remove(); updatePreview(); });
+        });
+    }
+
+    const payDownloadBtn = document.getElementById('pay-download-btn');
+    if (payDownloadBtn && !payDownloadBtn.hasAttribute('data-bound')) {
+        payDownloadBtn.setAttribute('data-bound', 'true');
+        payDownloadBtn.addEventListener('click', async () => {
+            if (!currentUser) {
+                showNotification('Please sign in or register first.', 'error');
+                document.getElementById('auth-modal')?.classList.remove('hidden');
+                return;
+            }
+
+            const previewBox = document.getElementById('live-preview');
+            const fullName = nameInput?.value || 'Alexander Wright';
+            const templateClass = previewBox?.className || 'template-preview minimal';
+            const previewInnerHtml = previewBox?.innerHTML || '';
+
+            let extractedCssText = '';
+            try {
+                for (let sheet of document.styleSheets) {
+                    try {
+                        for (let rule of sheet.cssRules) {
+                            extractedCssText += rule.cssText + '\n';
+                        }
+                    } catch (err) {}
+                }
+            } catch (e) {}
+
+            const fullWrappedHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${fullName} - Portfolio</title>
+    <style>
+        body { font-family: sans-serif; padding: 4rem; text-align: center; }
+        ${extractedCssText}
+    </style>
+</head>
+<body class="${templateClass}" style="background: ${previewBox.style.background}; color: ${previewBox.style.color};">
+    <div style="width: 100%; max-width: 900px; margin: 0 auto;">
+        ${previewInnerHtml}
+    </div>
+</body>
+</html>`;
+
+            const portfolioData = {
+                user_id: currentUser.id,
+                full_name: fullName,
+                bio: bioInput?.value || '',
+                image_url: imgInput?.value || '',
+                template_class: templateClass,
+                raw_html: fullWrappedHtml
+            };
+
+            if (supabaseClient) {
+                await supabaseClient.from('portfolios').upsert(portfolioData, { onConflict: 'user_id' });
+                await supabaseClient.from('orders').insert({
+                    user_id: currentUser.id,
+                    plan_name: selectedTierName,
+                    amount: `${selectedTierPrice} EGP`,
+                    portfolio_name: fullName
+                });
+            }
+
+            showNotification(`Initializing Paymob session for ${selectedTierPrice} EGP...`, 'success');
+
+            try {
+                const { data, error } = await supabaseClient.functions.invoke('paymob-checkout', {
+                    body: {
+                        amount: selectedTierPrice,
+                        userEmail: currentUser.email
+                    }
+                });
+
+                if (error || !data || !data.url) {
+                    throw new Error(error?.message || data?.error || 'Failed to generate checkout link.');
+                }
+
+                showNotification('Redirecting to Paymob checkout...', 'success');
+                setTimeout(() => {
+                    window.location.href = data.url;
+                }, 1000);
+
+            } catch (err) {
+                showNotification(err.message, 'error');
+            }
+        });
+    }
+
+    updatePreview();
+}
+
+function initAuthSystem() {
+    const modal = document.getElementById('auth-modal');
+    const authBtn = document.getElementById('auth-btn');
+    const closeBtn = document.getElementById('close-auth');
+    const switchLink = document.getElementById('switch-mode-link');
+    let isSignUp = false;
+
+    authBtn?.addEventListener('click', () => {
+        if (currentUser) {
+            supabaseClient?.auth.signOut().then(() => {
+                window.location.reload();
+            });
+        } else {
+            modal?.classList.remove('hidden');
+        }
+    });
+
+    closeBtn?.addEventListener('click', () => modal?.classList.add('hidden'));
+
+    switchLink?.addEventListener('click', (e) => {
+        e.preventDefault();
+        isSignUp = !isSignUp;
+        const authTitle = document.getElementById('auth-title');
+        if (authTitle) authTitle.textContent = isSignUp ? 'Create Account' : 'Sign In';
+        switchLink.textContent = isSignUp ? 'Sign In' : 'Register';
+    });
+
+    document.getElementById('auth-submit-btn')?.addEventListener('click', async () => {
+        const email = document.getElementById('auth-email')?.value;
+        const password = document.getElementById('auth-password')?.value;
+        if (!supabaseClient || !email || !password) return;
+
+        if (isSignUp) {
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) showNotification(error.message, 'error');
+            else { showNotification('Registration successful! Please sign in.', 'success'); isSignUp = false; }
+        } else {
+            const { error, data } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) showNotification(error.message, 'error');
+            else {
+                currentUser = data.user;
+                showNotification('Signed in successfully!', 'success');
+                modal?.classList.add('hidden');
+                if (authBtn) authBtn.textContent = 'Sign Out';
+            }
+        }
+    });
+}
+
+async function checkUserSession() {
+    if (!supabaseClient) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) {
+        currentUser = session.user;
+        loadUserProfileData();
+    }
+}
+
+async function loadUserOrdersPage() {
+    const ordersList = document.getElementById('orders-list');
+    if (!ordersList || !supabaseClient) return;
+
+    ordersList.innerHTML = `<div class="order-empty-state"><p>Loading your orders vault...</p></div>`;
+
+    const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
+
+    if (sessionError || !session) {
+        ordersList.innerHTML = `<div class="order-empty-state"><p>Please sign in to view your secure order vault.</p></div>`;
+        document.getElementById('auth-modal')?.classList.remove('hidden');
+        return;
+    }
+
+    const { data: orders, error: ordersError } = await supabaseClient
         .from('orders')
         .select('*')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
-    if (error || !orders || orders.length === 0) {
-        ordersListContainer.innerHTML = `
-            <div class="order-empty-state">
-                <p>No prior acquisitions found in your session vault.</p>
-            </div>`;
+    if (ordersError) {
+        console.error('Error fetching orders:', ordersError.message);
+        ordersList.innerHTML = `<div class="order-empty-state"><p>Error loading orders. Please try again later.</p></div>`;
         return;
     }
 
-    // Render orders
-    ordersListContainer.innerHTML = orders.map(order => `
+    if (!orders || orders.length === 0) {
+        ordersList.innerHTML = `<div class="order-empty-state"><p>No prior acquisitions found in your records.</p></div>`;
+        return;
+    }
+
+    ordersList.innerHTML = orders.map(o => `
         <div class="order-card">
             <div>
                 <div class="order-card-header">
-                    <span class="order-plan">${order.plan_name}</span>
-                    <span class="order-price">${order.amount}</span>
+                    <span class="order-plan">${o.plan_name}</span>
+                    <span class="order-price">${o.amount}</span>
                 </div>
                 <div class="order-details">
-                    <p><strong>Portfolio Name:</strong> ${order.portfolio_name || 'Untitled'}</p>
-                    <p><strong>Status:</strong> <span style="color: var(--lime);">Verified & Compiled</span></p>
+                    <p><strong>Portfolio:</strong> ${o.portfolio_name}</p>
+                    <p><strong>Status:</strong> <span style="color:var(--lime);">Compiled & Verified</span></p>
                 </div>
             </div>
-            <div class="order-date">
-                Acquired on: ${new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </div>
+            <div class="order-date">Acquired: ${new Date(o.created_at).toLocaleDateString()}</div>
         </div>
     `).join('');
 }
 
-// Attach event listener to nav link
-document.getElementById('nav-orders-link')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    loadUserOrders();
-});
-// Ensure this function is correctly declared in your global scope:
-function triggerStaticCodeDownloadWithData(portfolio) {
-    const name = portfolio?.full_name || 'Alexander Wright';
-    const bio = portfolio?.bio || 'Curator of digital environments.';
-    const imgUrl = portfolio?.image_url || '';
-    const socials = portfolio?.socials || '';
-    const templateClass = portfolio?.template_class || 'minimalist';
-
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${name} | Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent-warm: #d4af37;
-            --font-heading: 'Playfair Display', serif;
-            --font-body: 'Inter', sans-serif;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body.standalone-body {
-            width: 100vw;
-            height: 100vh;
-            margin: 0;
-            font-family: var(--font-body);
-            overflow: hidden;
-        }
-        .template-preview {
-            width: 100vw;
-            height: 100vh;
-            padding: 4rem 6rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .template-preview.minimalist { background: #fdfbf7; color: #1a1a1a; }
-        .template-preview.minimalist .preview-logo { color: #1a1a1a; }
-        .template-preview.editorial { background: #0d0d0d; color: #ffffff; }
-        .template-preview.editorial .preview-logo { color: var(--accent-warm); }
-        .template-preview.warm { background: #2b211d; color: #f3ece4; }
-        .template-preview.warm .preview-logo { color: #d4af37; }
-
-        .preview-nav { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        .preview-logo { font-family: var(--font-heading); font-weight: 700; font-size: 1.4rem; }
-        .preview-nav-links { display: flex; gap: 2.5rem; font-size: 0.95rem; }
-        .preview-nav-links a { text-decoration: none; color: inherit; opacity: 0.8; }
-        
-        .preview-body { text-align: center; max-width: 600px; margin: 0 auto; width: 100%; }
-        .preview-footer { text-align: center; font-size: 0.85rem; opacity: 0.6; width: 100%; }
-        
-        .preview-img-container img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 1.5rem auto;
-            border: 2px solid var(--accent-warm);
-        }
-        
-        h1 { font-family: var(--font-heading); font-size: 3.5rem; margin-bottom: 1rem; font-weight: 600; }
-        p { font-size: 1.1rem; line-height: 1.6; opacity: 0.9; }
-        .socials-list { margin-top: 1.5rem; display: flex; gap: 1.5rem; justify-content: center; font-size: 0.95rem; font-weight: 500; }
-    </style>
-</head>
-<body class="standalone-body">
-    <div class="template-preview ${templateClass}">
-        <header class="preview-nav">
-            <span class="preview-logo">${name.split(' ').map(n => n[0]).join('')}</span>
-            <nav class="preview-nav-links">
-                <a href="#work">Work</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
-            </nav>
-        </header>
-        
-        <div class="preview-body">
-            ${imgUrl ? `<div class="preview-img-container"><img src="${imgUrl}" alt="Portrait"></div>` : ''}
-            <h1>${name}</h1>
-            <p>${bio}</p>
-            ${socials ? `<div class="socials-list">${socials.split(',').map(s => `<span>${s.trim()}</span>`).join('')}</div>` : ''}
-        </div>
-
-        <footer class="preview-footer">
-            <p>&copy; 2026 ${name}. All rights reserved.</p>
-        </footer>
-    </div>
-</body>
-</html>`;
-
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+function triggerDirectDownload(htmlString, fullName) {
+    const blob = new Blob([htmlString], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'index.html';
+    a.download = `${fullName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-portfolio.html`;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
