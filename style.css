@@ -20,6 +20,30 @@
   --font-body: "Inter", sans-serif;
 }
 
+
+
+/* High-contrast, crystal-clear dark mode */
+html.dark-theme {
+  --bg-primary: #14150f;
+  --bg-secondary: #1c1e16;
+  --bg-card: #21231a;
+  --accent-warm: #f4f1e9;
+  --accent-warm-hover: #d8d9cc;
+  --text-main-dark: #171916;
+  --text-main: #f4f1e9;
+  --text-muted: #687066;
+  --border-color: rgba(244, 241, 233, 0.12);
+  --radius: 18px;
+  --radius-sm: 999px;
+  --lime: #d4f23b;
+  --coral: #ef6f5f;
+  --shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-body: "Inter", sans-serif;
+}
+
+
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -33,6 +57,7 @@ body {
   font-family: var(--font-body);
   line-height: 1.6;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Background grain overlay */
@@ -46,6 +71,19 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
 }
 
+/* Force form inputs & dropdowns to respect dark mode nicely */
+html.dark-theme input, 
+html.dark-theme select, 
+html.dark-theme textarea {
+  background-color: #171b16 !important;
+  color: #f8faf5 !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+html.dark-theme input::placeholder, 
+html.dark-theme textarea::placeholder {
+  color: #8c9687 !important;
+}
 h1,
 h2,
 h3,
@@ -400,7 +438,7 @@ h3,
   left: 0;
   width: 100%;
   height: 5px;
-  background: var(--text-main);
+  background: var(--accent-warm);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.35s ease;
@@ -419,7 +457,7 @@ h3,
 }
 
 .pricing-card.featured {
-  background: var(--text-main);
+  background: var(-);
   border-color: var(--text-main);
   color: var(--bg-primary);
   transform: translateY(-14px);

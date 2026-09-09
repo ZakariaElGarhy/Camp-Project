@@ -9,7 +9,22 @@ let currentUser = null;
 let selectedTierPrice = 300; 
 let selectedTierName = 'Starter Tier';
 let paymobPublicKey = 'egy_pk_test_vbzbYyPBfnFoppIsamCZl2ZmO2HiqJef';
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) return;
 
+    // Set initial button text based on current state
+    const isDark = localStorage.getItem('aura_theme') === 'dark';
+    themeToggleBtn.textContent = isDark ? 'Light' : 'Dark';
+
+    themeToggleBtn.addEventListener('click', () => {
+        const currentlyDark = document.documentElement.classList.toggle('dark-theme');
+        document.body.classList.toggle('dark-theme', currentlyDark);
+        
+        localStorage.setItem('aura_theme', currentlyDark ? 'dark' : 'light');
+        themeToggleBtn.textContent = currentlyDark ? 'Light' : 'Dark';
+    });
+});
 document.addEventListener('DOMContentLoaded', async () => {
     initAuthSystem();
     checkUserSession();
@@ -27,6 +42,7 @@ function showNotification(message, type = 'success') {
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
 }
+
 function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your portfolio.', message = 'Saving your build and preparing a protected payment session.') {
     const overlay = document.getElementById('checkout-loading');
     const checkoutButton = document.getElementById('pay-download-btn');
@@ -405,9 +421,9 @@ function initBuilderCanvasListeners() {
     const livePreview = document.getElementById('live-preview');
 
     function updatePreview() {
-        const nameVal = nameInput?.value || 'Alexander Wright';
+        const nameVal = nameInput?.value || 'Mohammad Alaa';
         if (prevName) prevName.textContent = nameVal;
-        if (prevLogo) prevLogo.textContent = nameVal.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AW';
+        if (prevLogo) prevLogo.textContent = nameVal.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'MA';
         if (prevBio) prevBio.textContent = bioInput?.value || '';
         
         if (templateSelector && livePreview) {
@@ -520,7 +536,7 @@ function initBuilderCanvasListeners() {
             setCheckoutLoading(true);
 
             const previewBox = document.getElementById('live-preview');
-            const fullName = nameInput?.value || 'Alexander Wright';
+            const fullName = nameInput?.value || 'Mohammad Alaa';
             const templateClass = previewBox?.className || 'template-preview minimal';
             const previewInnerHtml = previewBox?.innerHTML || '';
 
@@ -729,6 +745,7 @@ function triggerDirectDownload(htmlString, fullName) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
 
 // Handle Auto-Deployment and Fallback Download after Paymob Payment Verification
 document.addEventListener('DOMContentLoaded', async () => {
