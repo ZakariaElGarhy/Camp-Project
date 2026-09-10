@@ -7,7 +7,25 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260909-theme-2">
+    <script>
+    (function() {
+        const currentTheme = localStorage.getItem('aura_theme');
+        if (currentTheme === 'dark') {
+            document.documentElement.classList.add('dark-theme'); 
+        }
+    })();
+</script>
+    <style>
+        body.dark-theme {
+            --bg-primary: #121411;
+            --bg-secondary: #1a1c18;
+            --bg-card: #1c201a;
+            --text-main: #f4f1e9;
+            --text-muted: #a0a89d;
+            --border-color: rgba(244, 241, 233, 0.15);
+        }
+    </style>
 </head>
 <body>
     <div id="toast-container"></div>
@@ -19,76 +37,158 @@
             <a href="index.html">Home</a>
             <a href="plans.html">Plans</a>
             <a href="orders.html">Orders</a>
+            <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to dark mode" aria-pressed="false">Dark</button>
 
             <!-- Unified Auth / Profile Container inside Navbar -->
             <div id="auth-container" style="position: relative; display: inline-block;">
                 <button id="auth-btn" class="btn-outline">Sign In</button>
                 
-                <!-- Hidden by default until signed in -->
                 <div id="profile-menu-trigger" class="hidden" style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
                     <img id="nav-avatar-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238e8e8e'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Avatar" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
                 </div>
 
                 <!-- Dropdown Menu -->
-                <!-- Dropdown Menu with User Info -->
-<div id="profile-dropdown" class="hidden" style="position: absolute; right: 0; top: 50px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1rem; z-index: 1000; text-align: left;">
-    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
-        <img id="dropdown-avatar-preview" src="" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-        <div style="overflow: hidden;">
-            <p id="dropdown-user-email" style="font-size: 0.8rem; font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
-            <p id="dropdown-user-phone" style="font-size: 0.75rem; color: var(--text-muted, #777); margin: 0;">No phone set</p>
-        </div>
-    </div>
-    <button id="open-profile-modal" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: var(--text-main); cursor: pointer; font-size: 0.85rem; border-radius: 6px; margin-bottom: 0.25rem;">Edit Profile</button>
-    <button id="sign-out-btn" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: #e74c3c; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">Sign Out</button>
-</div>
+                <div id="profile-dropdown" class="hidden" style="position: absolute; right: 0; top: 50px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1rem; z-index: 1000; text-align: left;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+                        <img id="dropdown-avatar-preview" src="" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        <div style="overflow: hidden;">
+                            <p id="dropdown-user-email" style="font-size: 0.8rem; font-weight: 500; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                            <p id="dropdown-user-phone" style="font-size: 0.75rem; color: var(--text-muted, #777); margin: 0;">No phone set</p>
+                        </div>
+                    </div>
+                    <button id="open-profile-modal" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: var(--text-main); cursor: pointer; font-size: 0.85rem; border-radius: 6px; margin-bottom: 0.25rem;">Edit Profile</button>
+                    <button id="sign-out-btn" style="width: 100%; text-align: left; background: none; border: none; padding: 0.5rem 0.75rem; color: #e74c3c; cursor: pointer; font-size: 0.85rem; border-radius: 6px;">Sign Out</button>
+                </div>
             </div>
         </nav>
     </header>
 
     <!-- Hero Section -->
-    <section class="hero">
+    <section class="hero home-hero">
         <div class="hero-content">
-            <span class="sub-heading">Digital Presence Architect</span>
-            <h1>Curate your digital footprint with uncompromising style.</h1>
-            <p>Design, customize, and deploy static editorial portfolios instantly.</p>
-            <a href="plans.html" class="btn-solid">Launch Workspace</a>
+            <div class="hero-kicker-row">
+                <span class="sub-heading">Digital Presence Architect</span>
+                <span class="hero-status"><i></i> System online</span>
+            </div>
+            <h1>Make your work impossible to overlook.</h1>
+            <p>Build a portfolio with the clarity of a system and the point of view of an editorial piece.</p>
+            <div class="hero-actions">
+                <a href="plans.html" class="btn-solid">Launch Workspace</a>
+                <a href="#workflow" class="hero-text-link">See the method <span>↓</span></a>
+            </div>
+            <div class="hero-details" aria-label="AURA product details">
+                <div><span>01</span><b>Compose</b><small>Live visual builder</small></div>
+                <div><span>02</span><b>Refine</b><small>25 curated themes</small></div>
+                <div><span>03</span><b>Deploy</b><small>Secure cloud launch</small></div>
+            </div>
+        </div>
+        <div class="hero-showcase" aria-label="AURA portfolio preview">
+            <div class="showcase-label">AURA / LIVE SPECIMEN <span>v. 02.26</span></div>
+            <div class="showcase-window">
+                <div class="showcase-chrome"><span></span><span></span><span></span><em>aura.preview / selected-work</em></div>
+                <div class="showcase-page">
+                    <div class="showcase-nav"><strong>AW</strong><span>WORK&nbsp;&nbsp;&nbsp; ABOUT&nbsp;&nbsp;&nbsp; CONTACT</span></div>
+                    <div class="showcase-copy"><small>Independent creative / 2026</small><h2>Ideas with<br><i>architecture.</i></h2><p>A considered space for work that deserves a longer look.</p><a href="plans.html">Explore the workspace ↗</a></div>
+                    <div class="showcase-index"><span>SELECTED / 04</span><span>SCROLL TO DISCOVER</span></div>
+                </div>
+            </div>
+            <div class="showcase-note"><span>Designed for signal.</span><span>Built for momentum.</span></div>
         </div>
     </section>
 
-    <!-- Profile Settings Modal (Placed at the root level so it layers correctly) -->
+    <!-- How It Works Section -->
+    <section id="workflow" style="padding: 8rem 6vw; background: var(--bg-secondary); border-top: 1px solid var(--border-color);">
+        <div class="section-title">
+            <div>
+                <span class="sub-heading">Workflow Architecture</span>
+                <h2>How It Works</h2>
+            </div>
+            <p>A streamlined pipeline from design curation to secure cloud deployment.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; max-width: 1180px; margin: 0 auto;">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2.2rem; border-radius: var(--radius);">
+                <span style="font-family: monospace; font-size: 0.75rem; color: var(--coral);">01 / SELECT</span>
+                <h3 style="font-size: 1.5rem; margin: 0.5rem 0 1rem;">Choose Your Tier</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Sign in and choose from Starter, Pro, or Enterprise investment tiers to unlock your builder workspace.</p>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2.2rem; border-radius: var(--radius);">
+                <span style="font-family: monospace; font-size: 0.75rem; color: var(--coral);">02 / COMPOSE</span>
+                <h3 style="font-size: 1.5rem; margin: 0.5rem 0 1rem;">Builder Workspace</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Tailor your typography themes, contact vectors, social links, and featured work cards with real-time preview.</p>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2.2rem; border-radius: var(--radius);">
+                <span style="font-family: monospace; font-size: 0.75rem; color: var(--coral);">03 / DEPLOY</span>
+                <h3 style="font-size: 1.5rem; margin: 0.5rem 0 1rem;">Paymob & Cloud Launch</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Complete secure checkout via Paymob to automatically trigger cloud deployment and track records in your Orders Vault.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contributors Section -->
+    <section style="padding: 8rem 6vw; background: var(--bg-primary); border-top: 1px solid var(--border-color);">
+        <div class="section-title">
+            <div>
+                <span class="sub-heading">The Masterminds</span>
+                <h2>Our Contributors</h2>
+            </div>
+            <p>The core engineering team behind Camp-Project and the AURA system.</p>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; max-width: 1180px; margin: 0 auto;">
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: var(--radius);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Zakaria El Garhy</h3>
+                <span style="font-size: 0.65rem; font-family: monospace; color: var(--coral); text-transform: uppercase; display: block; margin-bottom: 1rem;">Organizer & Database Specialist</span>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Big brain team organizer and best database guy keeping data secure and structured.</p>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: var(--radius);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Mohammad Alaa</h3>
+                <span style="font-size: 0.65rem; font-family: monospace; color: var(--coral); text-transform: uppercase; display: block; margin-bottom: 1rem;">Front-End & Feedback Expert</span>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Team feedbacker, expert front-ender, and ultimate encourager driving user experience.</p>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: var(--radius);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Youssef Ibrahim</h3>
+                <span style="font-size: 0.65rem; font-family: monospace; color: var(--coral); text-transform: uppercase; display: block; margin-bottom: 1rem;">Front-End Developer and Web Designer</span>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Best front-end dev, cool guy, always working side-by-side with Zakaria.</p>
+            </div>
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 2rem; border-radius: var(--radius);">
+                <h3 style="font-size: 1.4rem; margin-bottom: 0.2rem;">Ahmad Hykal</h3>
+                <span style="font-size: 0.65rem; font-family: monospace; color: var(--coral); text-transform: uppercase; display: block; margin-bottom: 1rem;">Speaker & Presenter</span>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Professional speaker, creator of cool presentations, and the quiet powerhouse of the crew.</p>
+            </div>
+        </div>
+    </section>
+
     <!-- Profile Settings Modal -->
-<div id="profile-modal" class="modal hidden">
-    <div class="modal-content" style="max-width: 440px; background: var(--bg-primary, #fff); border: 1px solid var(--border-color, #e2e2e2); border-radius: 16px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 0;">Profile Workspace</h2>
-            <span class="close" id="close-profile-modal" style="cursor: pointer; font-size: 1.25rem;">&times;</span>
-        </div>
-        <p style="font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">Manage your credentials and portfolio identity.</p>
-        
-        <div class="form-group" style="text-align: center; margin-bottom: 1.5rem; background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 12px; border: 1px dashed var(--border-color, #ccc);">
-            <img id="modal-preview-avatar" src="" alt="Avatar Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid var(--border-color, #ddd);">
-            <input type="file" id="avatar-file-input" accept="image/*" style="display: block; margin: 0 auto; font-size: 0.8rem;">
-        </div>
+    <div id="profile-modal" class="modal hidden">
+        <div class="modal-content" style="max-width: 440px; background: var(--bg-primary, #fff); border: 1px solid var(--border-color, #e2e2e2); border-radius: 16px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin: 0;">Profile Workspace</h2>
+                <span class="close" id="close-profile-modal" style="cursor: pointer; font-size: 1.25rem;">&times;</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 1.5rem;">Manage your credentials and portfolio identity.</p>
+            
+            <div class="form-group" style="text-align: center; margin-bottom: 1.5rem; background: rgba(0,0,0,0.02); padding: 1rem; border-radius: 12px; border: 1px dashed var(--border-color, #ccc);">
+                <img id="modal-preview-avatar" src="" alt="Avatar Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; border: 2px solid var(--border-color, #ddd);">
+                <input type="file" id="avatar-file-input" accept="image/*" style="display: block; margin: 0 auto; font-size: 0.8rem;">
+            </div>
 
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Primary Email (Account)</label>
-            <input type="email" id="prof-email" disabled style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd); opacity: 0.7; background: #f5f5f5;">
-        </div>
-        <div class="form-group" style="margin-bottom: 1rem;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Secondary Email (Portfolio Contact)</label>
-            <input type="email" id="prof-sec-email" placeholder="work@domain.com" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
-        </div>
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-            <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Phone Number</label>
-            <input type="text" id="prof-phone" placeholder="+20 100 000 0000" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
-        </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Primary Email (Account)</label>
+                <input type="email" id="prof-email" disabled style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd); opacity: 0.7; background: #f5f5f5;">
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Secondary Email (Portfolio Contact)</label>
+                <input type="email" id="prof-sec-email" placeholder="work@domain.com" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.3rem;">Phone Number</label>
+                <input type="text" id="prof-phone" placeholder="+20 100 000 0000" style="width: 100%; padding: 0.6rem; border-radius: 8px; border: 1px solid var(--border-color, #ddd);">
+            </div>
 
-        <button id="save-profile-btn" class="btn-solid" style="width: 100%; padding: 0.75rem; border-radius: 8px; cursor: pointer;">Save Changes</button>
+            <button id="save-profile-btn" class="btn-solid" style="width: 100%; padding: 0.75rem; border-radius: 8px; cursor: pointer;">Save Changes</button>
+        </div>
     </div>
-</div>
 
-    <!-- Auth Modal (Ensure you have your login/register modal here if not included elsewhere) -->
+    <!-- Auth Modal -->
     <div id="auth-modal" class="modal hidden">
         <div class="modal-content" style="max-width: 400px;">
             <span class="close" id="close-auth">&times;</span>
@@ -97,7 +197,7 @@
                 <label>Email</label>
                 <input type="email" id="auth-email" placeholder="name@domain.com">
             </div>
-            <div class="form-group">
+            <div class="test-group form-group">
                 <label>Password</label>
                 <input type="password" id="auth-password" placeholder="••••••••">
             </div>

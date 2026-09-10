@@ -10,32 +10,118 @@ let selectedTierPrice = 300;
 let selectedTierName = 'Starter Tier';
 let paymobPublicKey = 'egy_pk_test_vbzbYyPBfnFoppIsamCZl2ZmO2HiqJef';
 
+const allPortfolioThemes = [
+    ['Midnight', '#242a30', '#f5f7f7', '#8da9bd'],
+    ['Paper', '#f4f0e8', '#191a18', '#9c978d'],
+    ['Slate', '#52606b', '#f5f7f8', '#a9c8dc'],
+    ['Mono', '#111111', '#f4f4f0', '#929292'],
+    ['Ivory', '#eee5d2', '#33271f', '#c5b28e'],
+    ['Graphite', '#303338', '#e7e8e5', '#a7adb5'],
+    ['Snow', '#fbfcfa', '#20252a', '#b8d2e4'],
+    ['Stone', '#b4aa99', '#171614', '#d5bf9b'],
+    ['Ink', '#15191b', '#f0e8d8', '#ba716b'],
+    ['Fog', '#d8dadd', '#252a2d', '#8d969d'],
+    ['Clean Code', '#f8faf7', '#14263b', '#71a47b'],
+    ['Devfolio', '#17283c', '#f4f8fb', '#67b7c8'],
+    ['Terminal Lite', '#252b28', '#e8ede5', '#83aa86'],
+    ['System', '#d1d5d8', '#151a20', '#7597ba'],
+    ['Blueprint', '#173553', '#dbeeff', '#83bfe8'],
+    ['Git', '#faf9f5', '#202326', '#d87839'],
+    ['Framework', '#36383d', '#f5f5f2', '#b09bd0'],
+    ['Compile', '#101212', '#d6d7d3', '#b7cf62'],
+    ['Stack', '#f8faf9', '#152d46', '#5eb9c7'],
+    ['Source', '#eee6d5', '#171512', '#c88655'],
+    ['The Journal', '#f1e9d9', '#1c1916', '#a79b8b'],
+    ['Studio', '#f8f7f3', '#181817', '#aaa398'],
+    ['Archive', '#d5c3a5', '#32251d', '#a45d5b'],
+    ['Index', '#fbfbf8', '#272b2d', '#8a9195'],
+    ['Column', '#eeeae0', '#171c19', '#63836d'],
+    ['Dispatch', '#ede5d7', '#14283d', '#8897a5'],
+    ['Type', '#151515', '#f2f0e9', '#a5a5a0'],
+    ['Modernist', '#f8f8f6', '#141414', '#789bb4'],
+    ['Print', '#eee5d4', '#171513', '#c68557'],
+    ['Volume', '#343839', '#f0eadb', '#c0aa59'],
+    ['Obsidian', '#111214', '#f2f2ef', '#9b8bb9'],
+    ['Carbon', '#1b1d20', '#dfe2e2', '#7695ad'],
+    ['Noir', '#171416', '#f0e4d1', '#934a52'],
+    ['Velvet', '#29262e', '#f1eadc', '#9380a7'],
+    ['Eclipse', '#111417', '#dfe3e5', '#7592ae'],
+    ['Onyx', '#171a18', '#e5e8e1', '#83a681'],
+    ['After Hours', '#1d2938', '#f0e6d5', '#c4875d'],
+    ['Black Label', '#101010', '#f5f4ef', '#c3a35b'],
+    ['Nightshift', '#272e35', '#dce9f3', '#9dbbd1'],
+    ['Darkroom', '#151515', '#eee9dd', '#a95d5a'],
+    ['Sage', '#e7ebdf', '#222c26', '#7d9a78'],
+    ['Ocean', '#f5f8f7', '#122b43', '#5a9f9c'],
+    ['Sand', '#d8c3a3', '#35291f', '#8e8170'],
+    ['Clay', '#eee0d0', '#3a241b', '#bf7056'],
+    ['Moss', '#e8e8d8', '#1e3325', '#718c6a'],
+    ['Cloud', '#f8fafb', '#29333b', '#9bbbd2'],
+    ['Cedar', '#eee3d1', '#263a2b', '#876348'],
+    ['Dawn', '#f6eee3', '#2a2d2c', '#d18c69'],
+    ['Gallery', '#f2eee7', '#20201e', '#b46f4b'],
+    ['Terminal Pro', '#07130f', '#b9ffd0', '#45f28a'],
+    ['Neon Grid', '#17102b', '#f7f0ff', '#e86cff'],
+    ['Luxe', '#211d1b', '#f5ead8', '#c7a15a'],
+    ['Aurora', '#10252a', '#e4fbf3', '#72d9b0']
+].map(([name, background, color, accent]) => ({
+    name,
+    value: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+    background,
+    color,
+    accent,
+    border: accent
+}));
+
+const featuredThemeNames = new Set([
+    'Midnight', 'Paper', 'Slate', 'Mono', 'Ivory',
+    'Graphite', 'Clean Code', 'Devfolio', 'Terminal Lite', 'Blueprint',
+    'Git', 'Compile', 'Stack', 'The Journal', 'Studio',
+    'Obsidian', 'Noir', 'Ocean', 'Cedar', 'Dawn',
+    'Gallery', 'Terminal Pro', 'Neon Grid', 'Luxe', 'Aurora'
+]);
+
+const portfolioThemes = allPortfolioThemes.filter(theme => featuredThemeNames.has(theme.name));
+
+function populateThemeSelector(selector) {
+    if (!selector || selector.dataset.catalogReady) return;
+    selector.innerHTML = portfolioThemes.map((theme, index) => {
+        const minimumTier = index < 10 ? 300 : index < 20 ? 600 : 3000;
+        return `<option value="${theme.value}" data-min-tier="${minimumTier}">${theme.name}${minimumTier > 300 ? ` - ${minimumTier === 600 ? 'Pro' : 'Enterprise'}` : ''}</option>`;
+    }).join('');
+    selector.dataset.catalogReady = 'true';
+}
+
+function getPortfolioTheme(value) {
+    return portfolioThemes.find(theme => theme.value === value) || portfolioThemes[0];
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (!themeToggleBtn) return;
+
+    const isDark = localStorage.getItem('aura_theme') === 'dark';
+    document.documentElement.classList.toggle('dark-theme', isDark);
+    document.body.classList.toggle('dark-theme', isDark);
+    themeToggleBtn.textContent = isDark ? 'Light' : 'Dark';
+    themeToggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggleBtn.setAttribute('aria-pressed', String(isDark));
+
+    themeToggleBtn.addEventListener('click', () => {
+        if (document.body.classList.contains('checkout-is-loading')) return;
+        const currentlyDark = document.documentElement.classList.toggle('dark-theme');
+        document.body.classList.toggle('dark-theme', currentlyDark);
+        
+        localStorage.setItem('aura_theme', currentlyDark ? 'dark' : 'light');
+        themeToggleBtn.textContent = currentlyDark ? 'Light' : 'Dark';
+        themeToggleBtn.setAttribute('aria-label', currentlyDark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeToggleBtn.setAttribute('aria-pressed', String(currentlyDark));
+    });
+});
 document.addEventListener('DOMContentLoaded', async () => {
     initAuthSystem();
     checkUserSession();
     initPlanAndBuilderFlow();
     loadUserOrdersPage();
-    
-
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment_success') === 'true') {
-        showNotification('Payment verified successfully via Paymob!', 'success');
-        window.history.replaceState({}, document.title, window.location.pathname);
-        if (supabaseClient) {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (session) {
-                const { data } = await supabaseClient
-                    .from('portfolios')
-                    .select('*')
-                    .eq('user_id', session.user.id)
-                    .single();
-                    
-                if (data && data.raw_html) {
-                    triggerDirectDownload(data.raw_html, data.full_name);
-                }
-            }
-        }
-    }
 });
 
 function showNotification(message, type = 'success') {
@@ -56,6 +142,9 @@ function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your 
 
     overlay.classList.toggle('hidden', !isLoading);
     document.body.classList.toggle('checkout-is-loading', isLoading);
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    themeToggleBtn?.toggleAttribute('disabled', isLoading);
+    themeToggleBtn?.setAttribute('aria-disabled', String(isLoading));
 
     if (isLoading) {
         overlay.querySelector('#checkout-loading-step').textContent = step;
@@ -75,35 +164,31 @@ function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your 
         checkoutButton.removeAttribute('aria-busy');
     }
 }
+
 // Function to update all avatar elements across the DOM and cache it
 function setCachedAvatar(avatarUrl) {
     if (avatarUrl) {
-        // Save to sessionStorage (persists across page reloads in the browser tab RAM)
         sessionStorage.setItem('aura_cached_avatar', avatarUrl);
     }
     
     const cachedUrl = avatarUrl || sessionStorage.getItem('aura_cached_avatar');
     
     if (cachedUrl) {
-        // Instantly populate all avatar elements on the page
         document.querySelectorAll('#nav-avatar-img, #dropdown-avatar-preview, #modal-preview-avatar').forEach(img => {
             if (img) img.src = cachedUrl;
         });
     }
 }
 
-// Inside your user session check or login success handler:
 async function handleUserSession(user) {
-    // 1. Check if we already have it in session storage to avoid layout shift/flicker instantly
     const cached = sessionStorage.getItem('aura_cached_avatar');
     if (cached) {
         setCachedAvatar(cached);
     }
 
-    // 2. Fetch fresh profile data from Supabase in the background
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabaseClient
         .from('profiles')
-        .甚至是('avatar_url') // adjust table/column names to match your schema
+        .select('avatar_url')
         .eq('id', user.id)
         .single();
 
@@ -114,13 +199,13 @@ async function handleUserSession(user) {
 
 document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
     sessionStorage.removeItem('aura_cached_avatar');
-    await supabase.auth.signOut();
+    await supabaseClient.auth.signOut();
     window.location.href = 'index.html';
 });
 
-
 function initPlanAndBuilderFlow() {
     const builderSection = document.getElementById('builder');
+    populateThemeSelector(document.getElementById('template-selector'));
     
     const savedPrice = sessionStorage.getItem('selectedTierPrice');
     const savedName = sessionStorage.getItem('selectedTierName');
@@ -163,6 +248,18 @@ function initPlanAndBuilderFlow() {
 
 function applyTierRestrictions(price) {
     window.selectedTierPrice = price;
+
+    const templateSelector = document.getElementById('template-selector');
+    if (templateSelector) {
+        populateThemeSelector(templateSelector);
+        templateSelector.querySelectorAll('option[data-min-tier]').forEach(option => {
+            option.disabled = price < Number(option.dataset.minTier);
+        });
+        const selectedOption = templateSelector.selectedOptions[0];
+        if (!selectedOption || selectedOption.disabled) {
+            templateSelector.value = price >= 3000 ? portfolioThemes[30].value : price >= 600 ? portfolioThemes[10].value : portfolioThemes[0].value;
+        }
+    }
 
     const imgGroup = document.getElementById('img-group');
     const contactsGroup = document.getElementById('contacts-section-wrap') || document.getElementById('contacts-container')?.closest('.form-group');
@@ -274,7 +371,6 @@ const openProfileModal = document.getElementById('open-profile-modal');
 const signOutBtn = document.getElementById('sign-out-btn');
 const saveProfileBtn = document.getElementById('save-profile-btn');
 
-// Toggle Dropdown Menu
 if (profileTrigger) {
     profileTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -283,7 +379,6 @@ if (profileTrigger) {
     window.addEventListener('click', () => profileDropdown.classList.add('hidden'));
 }
 
-// Open/Close Profile Modal
 if (openProfileModal) {
     openProfileModal.addEventListener('click', () => {
         profileModal.classList.remove('hidden');
@@ -295,7 +390,6 @@ if (closeProfileModal) {
     closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
 }
 
-// Fetch & Populate Profile Data
 async function loadUserProfileData() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
@@ -310,7 +404,6 @@ async function loadUserProfileData() {
 
     const finalAvatar = (profile && profile.avatar_url) ? profile.avatar_url : instagramDefaultAvatar;
 
-    // Update Nav & Dropdown Previews with Instagram default fallback
     const navAvatar = document.getElementById('nav-avatar-img');
     const dropdownAvatar = document.getElementById('dropdown-avatar-preview');
     const modalPreview = document.getElementById('modal-preview-avatar');
@@ -326,7 +419,6 @@ async function loadUserProfileData() {
         document.getElementById('prof-phone').value = profile.phone || '';
         document.getElementById('dropdown-user-phone').textContent = profile.phone || 'No phone set';
 
-        // AUTO-POPULATE BUILDER IF ON PLANS PAGE
         const imgInput = document.getElementById('p-img');
         if (imgInput && profile.avatar_url) {
             imgInput.value = profile.avatar_url;
@@ -341,7 +433,6 @@ async function loadUserProfileData() {
     }
 }
 
-// Save Profile & Upload Avatar to Supabase Storage
 if (saveProfileBtn) {
     saveProfileBtn.addEventListener('click', async () => {
         const { data: { user } } = await supabaseClient.auth.getUser();
@@ -354,7 +445,6 @@ if (saveProfileBtn) {
 
         showNotification('Saving profile updates...', 'info');
 
-        // Handle Avatar File Upload if chosen
         if (fileInput.files.length > 0) {
             const file = fileInput.files[0];
             const fileExt = file.name.split('.').pop();
@@ -377,7 +467,6 @@ if (saveProfileBtn) {
             avatarUrl = publicUrlData.publicUrl;
         }
 
-        // Upsert to profiles table
         const { error } = await supabaseClient
             .from('profiles')
             .upsert({
@@ -394,27 +483,27 @@ if (saveProfileBtn) {
         } else {
             showNotification('Profile updated and synchronized!', 'success');
             profileModal.classList.add('hidden');
-            loadUserProfileData(); // Refresh UI layout bindings
+            loadUserProfileData(); 
         }
     });
 }
 
-// Auth State Listener
 supabaseClient.auth.onAuthStateChange((event, session) => {
     const authBtn = document.getElementById('auth-btn');
     const profileTrigger = document.getElementById('profile-menu-trigger');
 
     if (session) {
+        currentUser = session.user;
         if (authBtn) authBtn.classList.add('hidden');
         if (profileTrigger) profileTrigger.classList.remove('hidden');
-        loadUserProfileData(); // Fetch profile details on login
+        loadUserProfileData(); 
     } else {
+        currentUser = null;
         if (authBtn) authBtn.classList.remove('hidden');
         if (profileTrigger) profileTrigger.classList.add('hidden');
     }
 });
 
-// Sign Out Action
 if (signOutBtn) {
     signOutBtn.addEventListener('click', async () => {
         await supabaseClient.auth.signOut();
@@ -440,29 +529,22 @@ function initBuilderCanvasListeners() {
     const livePreview = document.getElementById('live-preview');
 
     function updatePreview() {
-        const nameVal = nameInput?.value || 'Alexander Wright';
+        const nameVal = nameInput?.value || 'Mohammad Alaa';
         if (prevName) prevName.textContent = nameVal;
-        if (prevLogo) prevLogo.textContent = nameVal.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'AW';
+        if (prevLogo) prevLogo.textContent = nameVal.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'MA';
         if (prevBio) prevBio.textContent = bioInput?.value || '';
         
         if (templateSelector && livePreview) {
             const selectedTheme = templateSelector.value;
+            const theme = getPortfolioTheme(selectedTheme);
             livePreview.classList.remove('minimal', 'editorial', 'warm');
-            livePreview.classList.add(selectedTheme);
-
-            if (selectedTheme === 'editorial') {
-                livePreview.style.background = '#0d0d0d';
-                livePreview.style.color = '#f5f5f5';
-                livePreview.style.borderColor = '#333';
-            } else if (selectedTheme === 'warm') {
-                livePreview.style.background = '#f4eee1';
-                livePreview.style.color = '#2c221e';
-                livePreview.style.borderColor = '#d6ccc2';
-            } else {
-                livePreview.style.background = '#ffffff';
-                livePreview.style.color = '#111111';
-                livePreview.style.borderColor = '#e5e5e5';
-            }
+            livePreview.classList.add('theme-preview');
+            livePreview.classList.toggle('theme-special', theme.name === 'Gallery' || theme.name === 'Terminal Pro' || theme.name === 'Neon Grid' || theme.name === 'Luxe' || theme.name === 'Aurora');
+            livePreview.dataset.theme = theme.value;
+            livePreview.style.background = theme.background;
+            livePreview.style.color = theme.color;
+            livePreview.style.borderColor = theme.border;
+            livePreview.style.setProperty('--preview-accent', theme.accent);
         }
         
         if (selectedTierPrice >= 600 && imgInput && prevImgTag && prevImgWrap) {
@@ -552,16 +634,16 @@ function initBuilderCanvasListeners() {
                 document.getElementById('auth-modal')?.classList.remove('hidden');
                 return;
             }
-
             setCheckoutLoading(true);
 
             const previewBox = document.getElementById('live-preview');
-            const fullName = nameInput?.value || 'Alexander Wright';
+            const fullName = nameInput?.value || 'Mohammad Alaa';
             const templateClass = previewBox?.className || 'template-preview minimal';
             const previewInnerHtml = previewBox?.innerHTML || '';
 
             let extractedCssText = '';
             try {
+                
                 for (let sheet of document.styleSheets) {
                     try {
                         for (let rule of sheet.cssRules) {
@@ -600,12 +682,6 @@ function initBuilderCanvasListeners() {
 
             if (supabaseClient) {
                 await supabaseClient.from('portfolios').upsert(portfolioData, { onConflict: 'user_id' });
-                await supabaseClient.from('orders').insert({
-                    user_id: currentUser.id,
-                    plan_name: selectedTierName,
-                    amount: `${selectedTierPrice} EGP`,
-                    portfolio_name: fullName
-                });
             }
 
             showNotification(`Initializing Paymob session for ${selectedTierPrice} EGP...`, 'success');
@@ -622,7 +698,6 @@ function initBuilderCanvasListeners() {
                 if (error || !data || !data.url) {
                     throw new Error(error?.message || data?.error || 'Failed to generate checkout link.');
                 }
-
                 setCheckoutLoading(true, '03 / 03', 'Opening Paymob securely.', 'Your payment session is ready. Taking you to checkout now.');
                 showNotification('Redirecting to Paymob checkout...', 'success');
                 setTimeout(() => {
@@ -737,10 +812,18 @@ async function loadUserOrdersPage() {
                 </div>
                 <div class="order-details">
                     <p><strong>Portfolio:</strong> ${o.portfolio_name}</p>
-                    <p><strong>Status:</strong> <span style="color:var(--lime);">Compiled & Verified</span></p>
+                    <p><strong>Status:</strong> <span style="color:var(--lime);">${o.status === 'active' ? 'Compiled & Active' : 'Compiled & Verified'}</span></p>
                 </div>
             </div>
-            <div class="order-date">Acquired: ${new Date(o.created_at).toLocaleDateString()}</div>
+            
+            <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between;">
+                <div class="order-date">Acquired: ${new Date(o.created_at).toLocaleDateString()}</div>
+                ${o.live_url ? `
+                    <a href="${o.live_url}" target="_blank" class="btn-solid" style="display:inline-block; text-align:center; padding:0.4rem 0.9rem; font-size:0.75rem; text-decoration:none;">View Live Site ↗</a>
+                ` : `
+                    <span style="font-size:0.75rem; color:#e74c3c;">Deployment pending</span>
+                `}
+            </div>
         </div>
     `).join('');
 }
@@ -756,3 +839,92 @@ function triggerDirectDownload(htmlString, fullName) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
+
+
+// Handle Auto-Deployment and Fallback Download after Paymob Payment Verification
+document.addEventListener('DOMContentLoaded', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('payment_success') === 'true') {
+        showNotification('Payment verified successfully via Paymob!', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        if (supabaseClient) {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                const { data: portfolioData } = await supabaseClient
+                    .from('portfolios')
+                    .select('*')
+                    .eq('user_id', session.user.id)
+                    .single();
+                    
+                if (portfolioData && portfolioData.raw_html) {
+                    // 1. Trigger local file download fallback
+                    triggerDirectDownload(portfolioData.raw_html, portfolioData.full_name);
+
+                    showNotification('Deploying your portfolio to the cloud...', 'info');
+
+                    try {
+    // Explicitly trigger Vercel Edge Function deployment
+    const { data: funcData, error: funcError } = await supabaseClient.functions.invoke('deploy-portfolio', {
+        body: { 
+            htmlContent: portfolioData.raw_html, 
+            projectName: `${session.user.email.split('@')[0]}-${portfolioData.full_name || 'portfolio'}` 
+        }
+    });
+
+    if (funcError) {
+        // If it's a FunctionsHttpError, extract the exact message returned by the server
+        let detailedMsg = funcError.message;
+        if (typeof funcError.context?.json === 'function') {
+            try {
+                const errBody = await funcError.context.json();
+                detailedMsg = errBody.error || detailedMsg;
+            } catch (e) {}
+        }
+        throw new Error(detailedMsg);
+    }
+
+    if (!funcData || !funcData.success) {
+        throw new Error(funcData?.error || 'Deployment failed');
+    }
+
+    // 1. Ensure we have a valid live URL from the Edge Function
+const liveUrl = funcData.liveUrl;
+const targetProjectName = portfolioData.full_name || 'portfolio';
+
+// Insert the order with all required columns populated
+// Insert the order matching your exact table schema
+const { error: insertError } = await supabaseClient
+    .from('orders')
+    .insert([
+        {
+            user_id: session.user.id,
+            plan_name: portfolioData.plan_name || 'Portfolio Plan',
+            amount: String(portfolioData.amount || '3000'), // Stored as text in your schema
+            project_name: targetProjectName,
+            portfolio_name: portfolioData.portfolio_name || targetProjectName,
+            live_url: liveUrl,
+            status: 'active'
+        }
+    ]);
+
+if (insertError) {
+    console.error('Failed to save order to database:', insertError.message);
+    showNotification('Deployment went live, but failed to save order: ' + insertError.message, 'error');
+    return;
+}
+
+
+
+showNotification('Deployment successful! Order saved to your vault.', 'success');
+loadUserOrdersPage();
+
+} catch (err) {
+    console.error('Deployment Exception:', err);
+    showNotification('Cloud deployment note: ' + err.message, 'error');
+}
+                }
+            }
+        }
+    }
+});
