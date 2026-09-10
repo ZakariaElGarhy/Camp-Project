@@ -670,6 +670,15 @@ function initBuilderCanvasListeners() {
     </div>
 </body>
 </html>`;
+            document.querySelectorAll('.select-plan-btn').forEach(trigger => {
+                    trigger.addEventListener('click', (e) => {
+                        selectedTierPrice = (e.currentTarget.getAttribute('data-price') || '300', 10);
+                        selectedTierName = e.currentTarget.getAttribute('data-name') || 'Starter Tier';
+                        finalPrice = `${selectedTierPrice}EGP`
+                    })
+                });
+                        finalPrice = `${selectedTierPrice}EGP`
+
 
             const portfolioData = {
                 user_id: currentUser.id,
@@ -677,18 +686,13 @@ function initBuilderCanvasListeners() {
                 bio: bioInput?.value || '',
                 image_url: imgInput?.value || '',
                 template_class: templateClass,
-                raw_html: fullWrappedHtml
+                raw_html: fullWrappedHtml,
+                amount: finalPrice,
+                plan_name: selectedTierName,
             };
 
             if (supabaseClient) {
                 await supabaseClient.from('portfolios').upsert(portfolioData, { onConflict: 'user_id' });
-                await supabaseClient.from('orders').insert({
-                    user_id: currentUser.id,
-                    plan_name: selectedTierName,
-                    amount: `${selectedTierPrice} EGP`,
-                    portfolio_name: fullName,
-                    status: 'pending'
-                });
             }
 
             showNotification(`Initializing Paymob session for ${selectedTierPrice} EGP...`, 'success');

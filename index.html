@@ -9,16 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20260909-theme-2">
     <script>
-    // Global Theme Initialization to prevent flash of wrong theme
     (function() {
         const currentTheme = localStorage.getItem('aura_theme');
         if (currentTheme === 'dark') {
-            document.documentElement.classList.add('dark-theme'); // Adding to html element ensures instant application
+            document.documentElement.classList.add('dark-theme'); 
         }
     })();
 </script>
     <style>
-        /* Theme toggle button & dark theme variables matching AURA style */
         body.dark-theme {
             --bg-primary: #121411;
             --bg-secondary: #1a1c18;
