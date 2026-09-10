@@ -1,4 +1,3 @@
-// Initialize Supabase Client
 const SUPABASE_URL = 'https://qvgknqjltjawewkrjwxq.supabase.co'; 
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF2Z2tucWpsdGphd2V3a3Jqd3hxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NjEyNDUsImV4cCI6MjEwNDQzNzI0NX0.5t-xOr5eG8WMROBImoqJKjJM2kKlhbU1UDo2puYkAN8';
 const supabaseClient = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
@@ -165,7 +164,6 @@ function setCheckoutLoading(isLoading, step = '01 / 03', title = 'Securing your 
     }
 }
 
-// Function to update all avatar elements across the DOM and cache it
 function setCachedAvatar(avatarUrl) {
     if (avatarUrl) {
         sessionStorage.setItem('aura_cached_avatar', avatarUrl);
@@ -362,7 +360,6 @@ function updateContactsAndSocialsPreview() {
     }
 }
 
-// Profile Elements Selection
 const profileTrigger = document.getElementById('profile-menu-trigger');
 const profileDropdown = document.getElementById('profile-dropdown');
 const profileModal = document.getElementById('profile-modal');
@@ -864,7 +861,6 @@ function triggerDirectDownload(htmlString, fullName) {
 }
 
 
-// Handle Auto-Deployment and Fallback Download after Paymob Payment Verification
 document.addEventListener('DOMContentLoaded', async () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment_success') === 'true') {
@@ -881,13 +877,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .single();
                     
                 if (portfolioData && portfolioData.raw_html) {
-                    // 1. Trigger local file download fallback
                     triggerDirectDownload(portfolioData.raw_html, portfolioData.full_name);
 
                     showNotification('Deploying your portfolio to the cloud...', 'info');
 
                     try {
-    // Explicitly trigger Vercel Edge Function deployment
     const { data: funcData, error: funcError } = await supabaseClient.functions.invoke('deploy-portfolio', {
         body: { 
             htmlContent: portfolioData.raw_html, 
@@ -896,7 +890,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (funcError) {
-        // If it's a FunctionsHttpError, extract the exact message returned by the server
         let detailedMsg = funcError.message;
         if (typeof funcError.context?.json === 'function') {
             try {
@@ -911,19 +904,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         throw new Error(funcData?.error || 'Deployment failed');
     }
 
-    // 1. Ensure we have a valid live URL from the Edge Function
 const liveUrl = funcData.liveUrl;
 const targetProjectName = portfolioData.full_name || 'portfolio';
 
-// Insert the order with all required columns populated
-// Insert the order matching your exact table schema
 const { error: insertError } = await supabaseClient
     .from('orders')
     .insert([
         {
             user_id: session.user.id,
             plan_name: portfolioData.plan_name || 'Portfolio Plan',
-            amount: String(portfolioData.amount || '3000'), // Stored as text in your schema
+            amount: String(portfolioData.amount || '3000'),
             project_name: targetProjectName,
             portfolio_name: portfolioData.portfolio_name || targetProjectName,
             live_url: liveUrl,

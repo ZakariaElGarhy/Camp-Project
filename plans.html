@@ -10,11 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=20260909-theme-2">
     <script>
-    // Global Theme Initialization to prevent flash of wrong theme
     (function() {
         const currentTheme = localStorage.getItem('aura_theme');
         if (currentTheme === 'dark') {
-            document.documentElement.classList.add('dark-theme'); // Adding to html element ensures instant application
+            document.documentElement.classList.add('dark-theme'); 
         }
     })();
 </script>
@@ -62,7 +61,6 @@
             <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Switch to dark mode" aria-pressed="false">Dark</button>
 
             
-            <!-- Auth Container inside Nav -->
             <div id="auth-container" style="position: relative; display: inline-block;">
                 <button id="auth-btn" class="btn-outline">Sign In</button>
                 
@@ -70,7 +68,6 @@
                     <img id="nav-avatar-img" src="" alt="Avatar" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color);">
                 </div>
 
-                <!-- Dropdown Menu -->
                 <div id="profile-dropdown" class="hidden" style="position: absolute; right: 0; top: 50px; background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: 12px; width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 1rem; z-index: 1000; text-align: left;">
                     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
                         <img id="dropdown-avatar-preview" src="" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
@@ -132,7 +129,6 @@
         </div>
     </section>
 
-    <!-- Builder Workspace Section -->
     <section id="builder" class="builder-section" style="display: none; padding: 4rem 2rem;">
         <div class="builder-header">
             <div>
@@ -254,7 +250,6 @@
         </div>
     </section>
 
-    <!-- Profile Settings Modal -->
     <div id="profile-modal" class="modal hidden">
         <div class="modal-content profile-modal-content">
             <div class="profile-modal-heading">
@@ -308,7 +303,6 @@
         </div>
     </div>
 
-    <!-- Auth Modal Container (if needed) -->
     <div id="auth-modal" class="modal hidden">
        <div class="modal-content">
             <span class="close" id="close-auth">&times;</span>

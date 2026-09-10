@@ -1,6 +1,3 @@
-/* ==========================================================================
-   AURA Editorial Design System & Theme Styles
-   ================================================================---------- */
 
 :root {
   --bg-primary: #f4f1e9;
@@ -20,7 +17,6 @@
   --font-body: "Inter", sans-serif;
 }
 
-/* High-contrast, crystal-clear dark mode */
 html.dark-theme {
   --bg-primary: #14150f;
   --bg-secondary: #1c1e16;
@@ -59,7 +55,6 @@ body {
     color 0.3s ease;
 }
 
-/* Background grain overlay */
 body::before {
   content: "";
   position: fixed;
@@ -70,7 +65,6 @@ body::before {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E");
 }
 
-/* Force form inputs & dropdowns to respect dark mode nicely */
 html.dark-theme input,
 html.dark-theme select,
 html.dark-theme textarea {
@@ -91,7 +85,6 @@ h3,
   letter-spacing: -0.06em;
 }
 
-/* Toast Container Notifications */
 #toast-container {
   position: fixed;
   bottom: 2rem;
@@ -119,7 +112,6 @@ h3,
   color: #fff;
 }
 
-/* Navigation */
 .navbar {
   position: fixed;
   top: 0;
@@ -304,7 +296,6 @@ html.dark-theme .theme-toggle-btn:hover {
   box-shadow: 0 8px 20px rgba(197, 217, 74, 0.22);
 }
 
-/* Buttons */
 .btn-solid,
 .btn-outline {
   border-radius: 999px;
@@ -348,7 +339,6 @@ html.dark-theme .theme-toggle-btn:hover {
   color: var(--bg-primary);
 }
 
-/* Hero Section */
 .hero {
   min-height: 650px;
   display: flex;
@@ -420,7 +410,6 @@ html.dark-theme .theme-toggle-btn:hover {
   font-size: 1rem;
 }
 
-/* Pricing Section */
 .pricing-section {
   padding: 9rem 6vw 10rem;
   background: var(--bg-primary);
@@ -566,7 +555,6 @@ html.dark-theme .theme-toggle-btn:hover {
   color: var(--coral);
 }
 
-/* Builder Workspace */
 .builder-section {
   padding: 8rem 6vw 10rem;
   background: #dfe2d2;
@@ -678,7 +666,6 @@ html.dark-theme .theme-toggle-btn:hover {
   border-color: transparent;
 }
 
-/* Large Upgraded Canvas & macOS Browser Simulator */
 .builder-canvas {
   background: #c9cebf;
   border: 1px solid var(--border-color);
@@ -739,7 +726,6 @@ html.dark-theme .theme-toggle-btn:hover {
   letter-spacing: 0.05em;
 }
 
-/* Template Preview Container inside Canvas */
 .template-preview {
   padding: 3rem 4rem;
   display: flex;
@@ -875,7 +861,6 @@ html.dark-theme .theme-toggle-btn:hover {
   color: var(--preview-accent);
 }
 
-/* Template Themes */
 .template-preview.minimalist {
   background: #fbfaf5;
   color: #1a1a1a;
@@ -900,7 +885,6 @@ html.dark-theme .theme-toggle-btn:hover {
   color: #ffae7b;
 }
 
-/* Orders / Vault Section Style */
 .orders-section {
   padding: 12rem 6vw 10rem;
   background: var(--bg-primary);
@@ -1002,7 +986,6 @@ html.dark-theme .theme-toggle-btn:hover {
   font-size: 0.9rem;
 }
 
-/* Modals */
 .modal {
   position: fixed;
   top: 0;
@@ -1311,7 +1294,6 @@ html.dark-theme .theme-toggle-btn:hover {
 .hidden {
   display: none !important;
 }
-/* Increase top spacing for sections to prevent header overlapping */
 .builder-section,
 .pricing-section,
 .orders-section {
@@ -1320,7 +1302,6 @@ html.dark-theme .theme-toggle-btn:hover {
   z-index: 2;
 }
 
-/* Fix section-title alignment to prevent text clipping */
 .section-title,
 .builder-header,
 .orders-header {
@@ -1344,7 +1325,6 @@ html.dark-theme .theme-toggle-btn:hover {
   }
 }
 
-/* Responsive Rules */
 @media (max-width: 900px) {
   .navbar {
     padding-inline: 5vw;
@@ -1414,7 +1394,6 @@ html.dark-theme .theme-toggle-btn:hover {
   }
 }
 
-/* Orders vault surface. */
 .orders-page {
   --orders-line: rgba(23, 25, 22, 0.2);
   --coral: var(--lime);
@@ -1681,7 +1660,6 @@ html.dark-theme .theme-toggle-btn:hover {
   }
 }
 
-/* Flagship Plans surface. Scoped to preserve the shared builder and auth UI. */
 .plans-page {
   --plans-line: rgba(23, 25, 22, 0.2);
   background-color: var(--bg-primary);
@@ -2210,7 +2188,6 @@ html.dark-theme .theme-toggle-btn:hover {
   }
 }
 
-/* Full-bleed checkout handoff: editorial structure replaces the circular loader. */
 .checkout-loading {
   display: block;
   padding: 0;
@@ -2597,7 +2574,6 @@ html.dark-theme .theme-toggle-btn:hover {
   }
 }
 
-/* Dark theme surfaces and contrast corrections. Keep bright accents, but use deep ink on them. */
 html.dark-theme body {
   background: var(--bg-primary);
   color: var(--text-main);
@@ -2738,7 +2714,6 @@ html.dark-theme .plans-page {
   --plans-line: rgba(244, 241, 233, 0.16);
 }
 
-/* Plans grid system: quiet alignment lines behind the pricing architecture. */
 .plans-page .pricing-section {
   background-color: transparent;
   background-image:
@@ -2773,7 +2748,6 @@ html.dark-theme .checkout-loading-step.is-active b {
   color: var(--accent-ink);
 }
 
-/* Payment handoff is deliberately theme-neutral: keep the pre-payment screen black. */
 .checkout-is-loading .theme-toggle-btn {
   pointer-events: none;
   opacity: 0.45;
@@ -2793,7 +2767,6 @@ html.dark-theme .checkout-loading-step.is-active b {
   }
 }
 
-/* Home hero: a product specimen with editorial rhythm. */
 .home-hero {
   min-height: min(900px, 100svh);
   display: grid;
