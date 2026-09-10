@@ -390,6 +390,18 @@ if (closeProfileModal) {
     closeProfileModal.addEventListener('click', () => profileModal.classList.add('hidden'));
 }
 
+document.getElementById('avatar-file-input')?.addEventListener('change', (event) => {
+    const file = event.target.files?.[0];
+    const preview = document.getElementById('modal-preview-avatar');
+    if (!file || !preview || !file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+        preview.src = reader.result;
+    });
+    reader.readAsDataURL(file);
+});
+
 async function loadUserProfileData() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
